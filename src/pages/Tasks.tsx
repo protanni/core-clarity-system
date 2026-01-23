@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Task } from "@/types";
+import { Task, LifeArea } from "@/types";
 import { TaskItem } from "@/components/tasks/TaskItem";
+import { AreaTabs } from "@/components/shared/AreaTabs";
 import { Input } from "@/components/ui/input";
 
 const container = {
@@ -22,6 +23,7 @@ const item = {
 export default function TasksPage() {
   const [tasks, setTasks] = useLocalStorage<Task[]>("protanni-tasks", []);
   const [newTaskText, setNewTaskText] = useState("");
+  const [selectedArea, setSelectedArea] = useState<LifeArea>("all");
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +33,7 @@ export default function TasksPage() {
       id: crypto.randomUUID(),
       text: newTaskText.trim(),
       completed: false,
+      area: selectedArea === "all" ? undefined : selectedArea,
       createdAt: new Date().toISOString(),
     };
 
@@ -48,8 +51,18 @@ export default function TasksPage() {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
-  const incompleteTasks = tasks.filter((t) => !t.completed);
-  const completedTasks = tasks.filter((t) => t.completed);
+  // Filter tasks by selected area
+  const filteredTasks = useMemo(() => {
+    if (selectedArea === "all") return tasks;
+    return tasks.filter((t) => t.area === selectedArea);
+  }, [tasks, selectedArea]);
+
+  const incompleteTasks = filteredTasks.filter((t) => !t.completed);
+  const completedTasks = filteredTasks.filter((t) => t.completed);
+
+  // Total counts for header
+  const totalIncomplete = tasks.filter((t) => !t.completed).length;
+  const totalCompleted = tasks.filter((t) => t.completed).length;
 
   return (
     <div className="px-1 py-6 space-y-6">
@@ -61,9 +74,18 @@ export default function TasksPage() {
       >
         <h1 className="text-2xl font-semibold text-foreground">Tasks</h1>
         <p className="text-sm text-muted-foreground">
-          {incompleteTasks.length} open · {completedTasks.length} completed
+          {totalIncomplete} open · {totalCompleted} completed
         </p>
       </motion.header>
+
+      {/* Area Tabs */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+      >
+        <AreaTabs selectedArea={selectedArea} onAreaChange={setSelectedArea} />
+      </motion.div>
 
       {/* Add Task */}
       <motion.form
@@ -75,7 +97,7 @@ export default function TasksPage() {
       >
         <Input
           type="text"
-          placeholder="Add a new task..."
+          placeholder={selectedArea === "all" ? "Add a new task..." : `Add a ${selectedArea} task...`}
           value={newTaskText}
           onChange={(e) => setNewTaskText(e.target.value)}
           className="pr-10 bg-card border-border/50 shadow-card"
@@ -108,6 +130,7 @@ export default function TasksPage() {
                 onToggle={() => handleToggle(task.id)}
                 onDelete={() => handleDelete(task.id)}
                 showDelete
+                showArea={selectedArea === "all"}
               />
             ))}
           </motion.div>
@@ -127,6 +150,7 @@ export default function TasksPage() {
                   onToggle={() => handleToggle(task.id)}
                   onDelete={() => handleDelete(task.id)}
                   showDelete
+                  showArea={selectedArea === "all"}
                 />
               ))}
             </div>
@@ -134,7 +158,7 @@ export default function TasksPage() {
         )}
 
         {/* Empty State */}
-        {tasks.length === 0 && (
+        {filteredTasks.length === 0 && (
           <motion.div
             variants={item}
             className="text-center py-12"
@@ -143,7 +167,9 @@ export default function TasksPage() {
               <Plus className="w-5 h-5 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground text-sm">
-              No tasks yet. Add one above.
+              {selectedArea === "all" 
+                ? "No tasks yet. Add one above."
+                : `No ${selectedArea} tasks yet.`}
             </p>
           </motion.div>
         )}
