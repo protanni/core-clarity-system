@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CreditCard, User, LogOut } from "lucide-react";
+import { CreditCard, User, LogOut, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const container = {
@@ -85,9 +85,16 @@ export default function AccountPage() {
             <h2 className="text-base font-medium text-foreground">Profile</h2>
           </div>
           
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Email</span>
-            <span className="text-sm text-foreground">user@email.com</span>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Email</span>
+              <span className="text-sm text-foreground">user@email.com</span>
+            </div>
+            
+            <button className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <Pencil className="w-3 h-3" />
+              Edit profile
+            </button>
           </div>
         </motion.div>
 

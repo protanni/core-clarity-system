@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const container = {
@@ -32,7 +32,18 @@ export default function PaywallPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-12 relative">
+      {/* Back Button */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="absolute top-6 left-6 p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => navigate("/account")}
+        aria-label="Back to Account"
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </motion.button>
+
       <motion.div
         className="w-full max-w-sm space-y-8"
         variants={container}
