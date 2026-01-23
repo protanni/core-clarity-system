@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, CheckSquare, Repeat, CalendarDays } from "lucide-react";
+import { Home, CheckSquare, Repeat, CalendarDays, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +8,7 @@ const navItems = [
   { path: "/tasks", label: "Tasks", icon: CheckSquare },
   { path: "/habits", label: "Habits", icon: Repeat },
   { path: "/weekly", label: "Review", icon: CalendarDays },
+  { path: "/account", label: "Account", icon: User },
 ];
 
 export function BottomNav() {

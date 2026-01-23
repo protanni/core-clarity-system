@@ -8,6 +8,7 @@ import TodayPage from "./pages/Today";
 import TasksPage from "./pages/Tasks";
 import HabitsPage from "./pages/Habits";
 import WeeklyReviewPage from "./pages/WeeklyReview";
+import AccountPage from "./pages/Account";
 import LoginPage from "./pages/Login";
 import PaywallPage from "./pages/Paywall";
 import NotFound from "./pages/NotFound";
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/weekly" element={<WeeklyReviewPage />} />
+            <Route path="/account" element={<AccountPage />} />
           </Route>
           <Route path="/" element={<LoginPage />} />
           <Route path="*" element={<NotFound />} />
