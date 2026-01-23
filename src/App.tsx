@@ -7,7 +7,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import TodayPage from "./pages/Today";
 import TasksPage from "./pages/Tasks";
 import HabitsPage from "./pages/Habits";
-import MoodPage from "./pages/Mood";
+import WeeklyReviewPage from "./pages/WeeklyReview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,7 +23,7 @@ const App = () => (
             <Route path="/" element={<TodayPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/habits" element={<HabitsPage />} />
-            <Route path="/mood" element={<MoodPage />} />
+            <Route path="/weekly" element={<WeeklyReviewPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

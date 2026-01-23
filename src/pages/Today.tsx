@@ -122,8 +122,11 @@ export default function TodayPage() {
       initial="hidden"
       animate="show"
     >
-      {/* Header */}
+      {/* Header with System Framing */}
       <motion.header variants={item} className="space-y-1">
+        <p className="text-[10px] font-medium text-primary/70 uppercase tracking-widest">
+          Daily Control Layer
+        </p>
         <h1 className="text-2xl font-semibold text-foreground">{greeting}</h1>
         <p className="text-sm text-muted-foreground">{dateString}</p>
       </motion.header>
@@ -164,6 +167,7 @@ export default function TodayPage() {
                 key={task.id}
                 task={task}
                 onToggle={() => handleTaskToggle(task.id)}
+                showArea
               />
             ))
           ) : (
@@ -207,6 +211,7 @@ export default function TodayPage() {
                 habit={habit}
                 isCompletedToday={habit.completedToday}
                 onToggle={() => handleHabitToggle(habit.id)}
+                showProgress
               />
             ))
           ) : (
@@ -225,9 +230,14 @@ export default function TodayPage() {
 
       {/* Mood Check-in */}
       <motion.section variants={item} className="space-y-3">
-        <h2 className="text-sm font-medium text-foreground">
-          How are you feeling?
-        </h2>
+        <div className="space-y-1">
+          <h2 className="text-sm font-medium text-foreground">
+            How are you feeling?
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Emotional signal for today
+          </p>
+        </div>
         <div className="grid grid-cols-5 gap-2">
           {(["great", "good", "neutral", "low", "bad"] as MoodLevel[]).map(
             (level) => (

@@ -2,8 +2,9 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { Habit } from "@/types";
+import { Habit, LifeArea } from "@/types";
 import { HabitItem } from "@/components/habits/HabitItem";
+import { AreaTabs } from "@/components/shared/AreaTabs";
 import { Input } from "@/components/ui/input";
 
 const container = {
@@ -23,48 +24,26 @@ function getTodayISO(): string {
   return new Date().toISOString().split("T")[0];
 }
 
-function calculateStreak(completedDates: string[]): number {
-  if (completedDates.length === 0) return 0;
-
-  const sorted = [...completedDates].sort().reverse();
-  const today = getTodayISO();
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
-
-  // Check if streak is active (completed today or yesterday)
-  if (sorted[0] !== today && sorted[0] !== yesterday) return 0;
-
-  let streak = 1;
-  let currentDate = new Date(sorted[0]);
-
-  for (let i = 1; i < sorted.length; i++) {
-    const prevDate = new Date(currentDate.getTime() - 86400000);
-    const prevDateStr = prevDate.toISOString().split("T")[0];
-
-    if (sorted[i] === prevDateStr) {
-      streak++;
-      currentDate = prevDate;
-    } else {
-      break;
-    }
-  }
-
-  return streak;
-}
-
 export default function HabitsPage() {
   const [habits, setHabits] = useLocalStorage<Habit[]>("protanni-habits", []);
   const [newHabitName, setNewHabitName] = useState("");
+  const [selectedArea, setSelectedArea] = useState<LifeArea>("all");
 
   const today = getTodayISO();
 
+  // Filter habits by selected area
+  const filteredHabits = useMemo(() => {
+    if (selectedArea === "all") return habits;
+    return habits.filter((h) => h.area === selectedArea);
+  }, [habits, selectedArea]);
+
   const habitsWithStatus = useMemo(
     () =>
-      habits.map((h) => ({
+      filteredHabits.map((h) => ({
         ...h,
         completedToday: h.completedDates.includes(today),
-        streak: calculateStreak(h.completedDates),
       })),
-    [habits, today]
+    [filteredHabits, today]
   );
 
   const handleAddHabit = (e: React.FormEvent) => {
@@ -75,6 +54,7 @@ export default function HabitsPage() {
       id: crypto.randomUUID(),
       name: newHabitName.trim(),
       completedDates: [],
+      area: selectedArea === "all" ? undefined : selectedArea,
       createdAt: new Date().toISOString(),
     };
 
@@ -102,6 +82,7 @@ export default function HabitsPage() {
   };
 
   const completedCount = habitsWithStatus.filter((h) => h.completedToday).length;
+  const totalCompletedToday = habits.filter((h) => h.completedDates.includes(today)).length;
 
   return (
     <div className="px-1 py-6 space-y-6">
@@ -113,9 +94,18 @@ export default function HabitsPage() {
       >
         <h1 className="text-2xl font-semibold text-foreground">Habits</h1>
         <p className="text-sm text-muted-foreground">
-          {completedCount} of {habits.length} completed today
+          {totalCompletedToday} of {habits.length} completed today
         </p>
       </motion.header>
+
+      {/* Area Tabs */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05 }}
+      >
+        <AreaTabs selectedArea={selectedArea} onAreaChange={setSelectedArea} />
+      </motion.div>
 
       {/* Add Habit */}
       <motion.form
@@ -127,7 +117,7 @@ export default function HabitsPage() {
       >
         <Input
           type="text"
-          placeholder="Add a new habit..."
+          placeholder={selectedArea === "all" ? "Add a new habit..." : `Add a ${selectedArea} habit...`}
           value={newHabitName}
           onChange={(e) => setNewHabitName(e.target.value)}
           className="pr-10 bg-card border-border/50 shadow-card"
@@ -157,10 +147,11 @@ export default function HabitsPage() {
                 key={habit.id}
                 habit={habit}
                 isCompletedToday={habit.completedToday}
-                streak={habit.streak}
                 onToggle={() => handleToggle(habit.id)}
                 onDelete={() => handleDelete(habit.id)}
                 showDelete
+                showProgress
+                showArea={selectedArea === "all"}
               />
             ))}
           </motion.div>
@@ -170,7 +161,9 @@ export default function HabitsPage() {
               <Plus className="w-5 h-5 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground text-sm">
-              No habits yet. Add one above.
+              {selectedArea === "all"
+                ? "No habits yet. Add one above."
+                : `No ${selectedArea} habits yet.`}
             </p>
           </motion.div>
         )}

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Trash2 } from "lucide-react";
 import { Task } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
+import { AreaTag } from "@/components/shared/AreaTag";
 import { cn } from "@/lib/utils";
 
 interface TaskItemProps {
@@ -9,9 +10,16 @@ interface TaskItemProps {
   onToggle: () => void;
   onDelete?: () => void;
   showDelete?: boolean;
+  showArea?: boolean;
 }
 
-export function TaskItem({ task, onToggle, onDelete, showDelete = false }: TaskItemProps) {
+export function TaskItem({
+  task,
+  onToggle,
+  onDelete,
+  showDelete = false,
+  showArea = false,
+}: TaskItemProps) {
   return (
     <motion.div
       layout
@@ -27,16 +35,19 @@ export function TaskItem({ task, onToggle, onDelete, showDelete = false }: TaskI
             : "border-muted-foreground/30 hover:border-primary/50"
         )}
       />
-      <span
-        className={cn(
-          "flex-1 text-sm transition-all duration-200",
-          task.completed
-            ? "text-muted-foreground line-through"
-            : "text-foreground"
-        )}
-      >
-        {task.text}
-      </span>
+      <div className="flex-1 min-w-0 flex items-center gap-2">
+        <span
+          className={cn(
+            "text-sm transition-all duration-200",
+            task.completed
+              ? "text-muted-foreground line-through"
+              : "text-foreground"
+          )}
+        >
+          {task.text}
+        </span>
+        {showArea && task.area && <AreaTag area={task.area} />}
+      </div>
       {showDelete && onDelete && (
         <button
           onClick={onDelete}
