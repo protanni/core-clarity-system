@@ -24,11 +24,12 @@ const App = () => (
           <Route path="/login" element={<LoginPage />} />
           <Route path="/pricing" element={<PaywallPage />} />
           <Route element={<AppLayout />}>
-            <Route path="/" element={<TodayPage />} />
+            <Route path="/app" element={<TodayPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/weekly" element={<WeeklyReviewPage />} />
           </Route>
+          <Route path="/" element={<LoginPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

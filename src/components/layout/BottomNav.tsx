@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { path: "/", label: "Today", icon: Home },
+  { path: "/app", label: "Today", icon: Home },
   { path: "/tasks", label: "Tasks", icon: CheckSquare },
   { path: "/habits", label: "Habits", icon: Repeat },
   { path: "/weekly", label: "Review", icon: CalendarDays },
