@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,11 @@ const item = {
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
+  const navigate = useNavigate();
+
+  const handleContinue = () => {
+    navigate("/pricing");
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
@@ -52,7 +58,7 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button className="w-full" size="lg">
+          <Button className="w-full" size="lg" onClick={handleContinue}>
             Continue
           </Button>
         </motion.div>

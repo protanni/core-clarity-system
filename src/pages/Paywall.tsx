@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,12 @@ const benefits = [
 ];
 
 export default function PaywallPage() {
+  const navigate = useNavigate();
+
+  const handleSubscribe = () => {
+    navigate("/app");
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6 py-12">
       <motion.div
@@ -74,7 +81,7 @@ export default function PaywallPage() {
           </ul>
 
           {/* CTA */}
-          <Button className="w-full" size="lg">
+          <Button className="w-full" size="lg" onClick={handleSubscribe}>
             Start Your Journey
           </Button>
         </motion.div>
