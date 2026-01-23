@@ -1,8 +1,10 @@
-import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Task, Habit, MoodEntry, MoodLevel, WeeklyReflection } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Check, Pencil } from "lucide-react";
 
 const container = {
   hidden: { opacity: 0 },
@@ -52,6 +54,9 @@ export default function WeeklyReviewPage() {
     "protanni-weekly-reflections",
     []
   );
+  
+  const [isSaved, setIsSaved] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
 
   const weekDates = useMemo(() => getWeekDates(), []);
   const weekStart = getWeekStartISO();
@@ -61,6 +66,8 @@ export default function WeeklyReviewPage() {
     () => reflections.find((r) => r.weekStartDate === weekStart),
     [reflections, weekStart]
   );
+  
+  const hasContent = (currentReflection?.wentWell?.trim() || currentReflection?.nextWeekFocus?.trim());
 
   // Days with any activity (task completed or habit done)
   const daysShowedUp = useMemo(() => {
@@ -157,6 +164,11 @@ export default function WeeklyReviewPage() {
   }, [moodEntries, weekDates]);
 
   const handleReflectionChange = (field: "wentWell" | "nextWeekFocus", value: string) => {
+    // Reset saved state when editing
+    if (isSaved) {
+      setIsSaved(false);
+    }
+    
     setReflections((prev) => {
       const existingIndex = prev.findIndex((r) => r.weekStartDate === weekStart);
       if (existingIndex >= 0) {
@@ -174,6 +186,16 @@ export default function WeeklyReviewPage() {
         },
       ];
     });
+  };
+  
+  const handleSaveReview = () => {
+    setIsSaved(true);
+    setIsEditing(false);
+  };
+  
+  const handleEditReview = () => {
+    setIsEditing(true);
+    setIsSaved(false);
   };
 
   const areaLabels: Record<string, string> = {
@@ -280,9 +302,20 @@ export default function WeeklyReviewPage() {
         variants={item}
         className="bg-card rounded-xl p-5 shadow-card border border-border/50 space-y-4"
       >
-        <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Gentle Reflection
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Gentle Reflection
+          </h2>
+          {isSaved && !isEditing && (
+            <button
+              onClick={handleEditReview}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Pencil className="w-3 h-3" />
+              Edit
+            </button>
+          )}
+        </div>
         <div className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm text-foreground">What went well this week?</label>
@@ -290,7 +323,8 @@ export default function WeeklyReviewPage() {
               placeholder="Take a moment to acknowledge your wins..."
               value={currentReflection?.wentWell || ""}
               onChange={(e) => handleReflectionChange("wentWell", e.target.value)}
-              className="min-h-[80px] bg-muted/50 border-border/50 resize-none"
+              disabled={isSaved && !isEditing}
+              className="min-h-[80px] bg-muted/50 border-border/50 resize-none disabled:opacity-70 disabled:cursor-default"
             />
           </div>
           <div className="space-y-2">
@@ -299,11 +333,46 @@ export default function WeeklyReviewPage() {
               placeholder="Set your intention for the week ahead..."
               value={currentReflection?.nextWeekFocus || ""}
               onChange={(e) => handleReflectionChange("nextWeekFocus", e.target.value)}
-              className="min-h-[80px] bg-muted/50 border-border/50 resize-none"
+              disabled={isSaved && !isEditing}
+              className="min-h-[80px] bg-muted/50 border-border/50 resize-none disabled:opacity-70 disabled:cursor-default"
             />
           </div>
         </div>
       </motion.section>
+
+      {/* Save Button / Confirmation */}
+      <motion.div variants={item} className="pt-2 pb-4">
+        <AnimatePresence mode="wait">
+          {isSaved && !isEditing ? (
+            <motion.div
+              key="saved"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              className="flex items-center justify-center gap-2 text-sm text-primary"
+            >
+              <Check className="w-4 h-4" />
+              Review saved
+            </motion.div>
+          ) : (
+            <motion.div
+              key="button"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+            >
+              <Button
+                onClick={handleSaveReview}
+                disabled={!hasContent}
+                className="w-full"
+                variant="default"
+              >
+                Save review
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
     </motion.div>
   );
 }
