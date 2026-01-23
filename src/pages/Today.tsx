@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Plus, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Task, Habit, MoodEntry, DailyFocus, MoodLevel } from "@/types";
@@ -46,6 +46,9 @@ export default function TodayPage() {
   const [habits, setHabits] = useLocalStorage<Habit[]>("protanni-habits", []);
   const [moodEntries, setMoodEntries] = useLocalStorage<MoodEntry[]>("protanni-mood", []);
   const [dailyFocus, setDailyFocus] = useLocalStorage<DailyFocus | null>("protanni-focus", null);
+  
+  const [isEditingFocus, setIsEditingFocus] = useState(false);
+  const [focusInput, setFocusInput] = useState("");
 
   const today = getTodayISO();
   const greeting = getGreeting();
@@ -72,9 +75,24 @@ export default function TodayPage() {
 
   // Check if focus is for today
   const currentFocus = dailyFocus?.date === today ? dailyFocus.text : "";
+  const hasFocus = currentFocus.trim().length > 0;
 
-  const handleFocusChange = (text: string) => {
-    setDailyFocus({ text, date: today });
+  const handleStartEditing = () => {
+    setFocusInput(currentFocus);
+    setIsEditingFocus(true);
+  };
+
+  const handleSaveFocus = () => {
+    if (focusInput.trim()) {
+      setDailyFocus({ text: focusInput.trim(), date: today });
+    }
+    setIsEditingFocus(false);
+  };
+
+  const handleFocusKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSaveFocus();
+    }
   };
 
   const handleTaskToggle = (taskId: string) => {
@@ -139,13 +157,38 @@ export default function TodayPage() {
         <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
           Daily Focus
         </label>
-        <Input
-          type="text"
-          placeholder="What matters most today?"
-          value={currentFocus}
-          onChange={(e) => handleFocusChange(e.target.value)}
-          className="border-0 bg-muted/50 placeholder:text-muted-foreground/60 focus-visible:ring-1 focus-visible:ring-primary/30"
-        />
+        
+        {!hasFocus && !isEditingFocus ? (
+          <button
+            onClick={handleStartEditing}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+          >
+            <Plus className="w-4 h-4" />
+            Set daily focus
+          </button>
+        ) : isEditingFocus ? (
+          <Input
+            type="text"
+            placeholder="What matters most today?"
+            value={focusInput}
+            onChange={(e) => setFocusInput(e.target.value)}
+            onBlur={handleSaveFocus}
+            onKeyDown={handleFocusKeyDown}
+            autoFocus
+            className="border-0 bg-muted/50 placeholder:text-muted-foreground/60 focus-visible:ring-1 focus-visible:ring-primary/30"
+          />
+        ) : (
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-sm text-foreground leading-relaxed">{currentFocus}</p>
+            <button
+              onClick={handleStartEditing}
+              className="flex-shrink-0 p-1 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Edit focus"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </motion.section>
 
       {/* Open Tasks */}
