@@ -1,4 +1,4 @@
-export type LifeArea = "all" | "health" | "work" | "personal" | "mind";
+export type LifeArea = "all" | "work" | "personal" | "mind" | "body" | "relationships";
 
 export interface Task {
   id: string;

@@ -9,10 +9,11 @@ interface AreaTabsProps {
 
 const areas: { value: LifeArea; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "health", label: "Health" },
   { value: "work", label: "Work" },
   { value: "personal", label: "Personal" },
   { value: "mind", label: "Mind" },
+  { value: "body", label: "Body" },
+  { value: "relationships", label: "Relationships" },
 ];
 
 export function AreaTabs({ selectedArea, onAreaChange, className }: AreaTabsProps) {

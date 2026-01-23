@@ -8,6 +8,8 @@ import TodayPage from "./pages/Today";
 import TasksPage from "./pages/Tasks";
 import HabitsPage from "./pages/Habits";
 import WeeklyReviewPage from "./pages/WeeklyReview";
+import LoginPage from "./pages/Login";
+import PaywallPage from "./pages/Paywall";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,6 +21,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/pricing" element={<PaywallPage />} />
           <Route element={<AppLayout />}>
             <Route path="/" element={<TodayPage />} />
             <Route path="/tasks" element={<TasksPage />} />

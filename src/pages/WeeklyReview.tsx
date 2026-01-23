@@ -177,10 +177,11 @@ export default function WeeklyReviewPage() {
   };
 
   const areaLabels: Record<string, string> = {
-    health: "Health",
     work: "Work",
     personal: "Personal",
     mind: "Mind",
+    body: "Body",
+    relationships: "Relationships",
   };
 
   return (
@@ -226,7 +227,7 @@ export default function WeeklyReviewPage() {
         </h2>
         {areasTouched.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {["health", "work", "personal", "mind"].map((area) => {
+            {["work", "personal", "mind", "body", "relationships"].map((area) => {
               const isTouched = areasTouched.includes(area);
               return (
                 <div
