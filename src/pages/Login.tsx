@@ -22,7 +22,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleContinue = () => {
-    navigate("/pricing");
+    navigate("/app");
   };
 
   return (
