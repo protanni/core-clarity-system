@@ -3,11 +3,14 @@ import { motion } from "framer-motion";
 import { ChevronRight, Plus, Pencil } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { Task, Habit, MoodEntry, DailyFocus, MoodLevel } from "@/types";
 import { MoodCard } from "@/components/mood/MoodCard";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { HabitItem } from "@/components/habits/HabitItem";
+import { OfflineBanner } from "@/components/shared/OfflineBanner";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
 
 const container = {
   hidden: { opacity: 0 },
@@ -49,6 +52,16 @@ export default function TodayPage() {
   
   const [isEditingFocus, setIsEditingFocus] = useState(false);
   const [focusInput, setFocusInput] = useState("");
+  
+  const isOnline = useOnlineStatus();
+
+  const showOfflineToast = () => {
+    toast({
+      title: "Offline",
+      description: "Reconnect to save changes.",
+      variant: "destructive",
+    });
+  };
 
   const today = getTodayISO();
   const greeting = getGreeting();
@@ -78,11 +91,19 @@ export default function TodayPage() {
   const hasFocus = currentFocus.trim().length > 0;
 
   const handleStartEditing = () => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
     setFocusInput(currentFocus);
     setIsEditingFocus(true);
   };
 
   const handleSaveFocus = () => {
+    if (!isOnline) {
+      setIsEditingFocus(false);
+      return;
+    }
     if (focusInput.trim()) {
       setDailyFocus({ text: focusInput.trim(), date: today });
     }
@@ -96,12 +117,20 @@ export default function TodayPage() {
   };
 
   const handleTaskToggle = (taskId: string) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, completed: !t.completed } : t))
     );
   };
 
   const handleHabitToggle = (habitId: string) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
     setHabits((prev) =>
       prev.map((h) => {
         if (h.id !== habitId) return h;
@@ -117,6 +146,10 @@ export default function TodayPage() {
   };
 
   const handleMoodSelect = (level: MoodLevel) => {
+    if (!isOnline) {
+      showOfflineToast();
+      return;
+    }
     setMoodEntries((prev) => {
       const filtered = prev.filter((m) => m.date !== today);
       return [
@@ -134,12 +167,14 @@ export default function TodayPage() {
   const completedHabitsCount = habitsWithStatus.filter((h) => h.completedToday).length;
 
   return (
-    <motion.div
-      className="px-1 py-6 space-y-6"
-      variants={container}
-      initial="hidden"
-      animate="show"
-    >
+    <>
+      {!isOnline && <OfflineBanner />}
+      <motion.div
+        className="px-1 py-6 space-y-6"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
       {/* Header with System Framing */}
       <motion.header variants={item} className="space-y-1">
         <p className="text-[10px] font-medium text-primary/70 uppercase tracking-widest">
@@ -211,6 +246,7 @@ export default function TodayPage() {
                 task={task}
                 onToggle={() => handleTaskToggle(task.id)}
                 showArea
+                disabled={!isOnline}
               />
             ))
           ) : (
@@ -255,6 +291,7 @@ export default function TodayPage() {
                 isCompletedToday={habit.completedToday}
                 onToggle={() => handleHabitToggle(habit.id)}
                 showProgress
+                disabled={!isOnline}
               />
             ))
           ) : (
@@ -289,11 +326,13 @@ export default function TodayPage() {
                 level={level}
                 isSelected={todayMood?.level === level}
                 onSelect={() => handleMoodSelect(level)}
+                disabled={!isOnline}
               />
             )
           )}
         </div>
       </motion.section>
     </motion.div>
+    </>
   );
 }

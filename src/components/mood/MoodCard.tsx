@@ -8,6 +8,7 @@ interface MoodCardProps {
   isSelected: boolean;
   onSelect: () => void;
   size?: "small" | "large";
+  disabled?: boolean;
 }
 
 const moodConfig: Record<
@@ -46,22 +47,24 @@ const moodConfig: Record<
   },
 };
 
-export function MoodCard({ level, isSelected, onSelect, size = "small" }: MoodCardProps) {
+export function MoodCard({ level, isSelected, onSelect, size = "small", disabled = false }: MoodCardProps) {
   const config = moodConfig[level];
   const Icon = config.icon;
 
   return (
     <motion.button
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={disabled ? {} : { scale: 1.02 }}
+      whileTap={disabled ? {} : { scale: 0.98 }}
       onClick={onSelect}
+      disabled={disabled}
       className={cn(
         "w-full flex flex-col items-center justify-center rounded-xl transition-all duration-200",
         config.bgClass,
         size === "large" ? "p-4 gap-2" : "p-3 gap-1.5",
+        disabled && "opacity-50 cursor-not-allowed",
         isSelected
           ? "ring-2 ring-primary ring-offset-2 ring-offset-background shadow-lg"
-          : "hover:shadow-md"
+          : !disabled && "hover:shadow-md"
       )}
     >
       <Icon
