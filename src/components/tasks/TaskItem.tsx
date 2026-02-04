@@ -11,6 +11,7 @@ interface TaskItemProps {
   onDelete?: () => void;
   showDelete?: boolean;
   showArea?: boolean;
+  disabled?: boolean;
 }
 
 export function TaskItem({
@@ -19,17 +20,20 @@ export function TaskItem({
   onDelete,
   showDelete = false,
   showArea = false,
+  disabled = false,
 }: TaskItemProps) {
   return (
     <motion.div
       layout
-      className="flex items-center gap-3 p-4 group"
+      className={cn("flex items-center gap-3 p-4 group", disabled && "opacity-60")}
     >
       <Checkbox
         checked={task.completed}
         onCheckedChange={onToggle}
+        disabled={disabled}
         className={cn(
           "h-5 w-5 rounded-full border-2 transition-colors",
+          disabled && "cursor-not-allowed",
           task.completed
             ? "border-primary bg-primary data-[state=checked]:bg-primary"
             : "border-muted-foreground/30 hover:border-primary/50"
