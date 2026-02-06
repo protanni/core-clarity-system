@@ -14,6 +14,10 @@ import AccountPage from "./pages/Account";
 import LoginPage from "./pages/Login";
 import PaywallPage from "./pages/Paywall";
 import NotFound from "./pages/NotFound";
+import { seedDemoData } from "./lib/seedData";
+
+// Seed demo data for archive preview
+seedDemoData();
 
 const queryClient = new QueryClient();
 
