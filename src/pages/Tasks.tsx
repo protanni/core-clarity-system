@@ -1,11 +1,13 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { Plus, ArrowUpRight } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useTodayTasks } from "@/hooks/useTodayTasks";
 import { Task, LifeArea } from "@/types";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { AreaTabs } from "@/components/shared/AreaTabs";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
 
 const container = {
   hidden: { opacity: 0 },
@@ -24,6 +26,7 @@ export default function TasksPage() {
   const [tasks, setTasks] = useLocalStorage<Task[]>("protanni-tasks", []);
   const [newTaskText, setNewTaskText] = useState("");
   const [selectedArea, setSelectedArea] = useState<LifeArea>("all");
+  const { addToToday, isInToday } = useTodayTasks();
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +54,14 @@ export default function TasksPage() {
     setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
+  const handleBringToToday = (taskId: string) => {
+    addToToday(taskId);
+    toast({
+      title: "Added to Today",
+      description: "This task will appear in your Today view.",
+    });
+  };
+
   // Filter tasks by selected area
   const filteredTasks = useMemo(() => {
     if (selectedArea === "all") return tasks;
@@ -73,7 +84,10 @@ export default function TasksPage() {
         className="space-y-1"
       >
         <h1 className="text-2xl font-semibold text-foreground">Tasks</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
+          All tasks — bring to Today when you want to focus on them
+        </p>
+        <p className="text-sm text-muted-foreground mt-1">
           {totalIncomplete} open · {totalCompleted} completed
         </p>
       </motion.header>
@@ -129,6 +143,10 @@ export default function TasksPage() {
                 task={task}
                 onToggle={() => handleToggle(task.id)}
                 onDelete={() => handleDelete(task.id)}
+                onBringToToday={
+                  !isInToday(task.id) ? () => handleBringToToday(task.id) : undefined
+                }
+                isInToday={isInToday(task.id)}
                 showDelete
                 showArea={selectedArea === "all"}
               />
@@ -167,7 +185,7 @@ export default function TasksPage() {
               <Plus className="w-5 h-5 text-muted-foreground" />
             </div>
             <p className="text-muted-foreground text-sm">
-              {selectedArea === "all" 
+              {selectedArea === "all"
                 ? "No tasks yet. Add one above."
                 : `No ${selectedArea} tasks yet.`}
             </p>

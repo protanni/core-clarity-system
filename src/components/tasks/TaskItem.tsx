@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Trash2 } from "lucide-react";
+import { Trash2, ArrowUpRight, X, Sun } from "lucide-react";
 import { Task } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AreaTag } from "@/components/shared/AreaTag";
@@ -9,8 +9,12 @@ interface TaskItemProps {
   task: Task;
   onToggle: () => void;
   onDelete?: () => void;
+  onBringToToday?: () => void;
+  onRemoveFromToday?: () => void;
   showDelete?: boolean;
   showArea?: boolean;
+  showTodayBadge?: boolean;
+  isInToday?: boolean;
   disabled?: boolean;
 }
 
@@ -18,8 +22,12 @@ export function TaskItem({
   task,
   onToggle,
   onDelete,
+  onBringToToday,
+  onRemoveFromToday,
   showDelete = false,
   showArea = false,
+  showTodayBadge = false,
+  isInToday = false,
   disabled = false,
 }: TaskItemProps) {
   return (
@@ -51,15 +59,49 @@ export function TaskItem({
           {task.text}
         </span>
         {showArea && task.area && <AreaTag area={task.area} />}
+        {showTodayBadge && (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary/10 text-primary">
+            <Sun className="w-2.5 h-2.5" />
+            Today
+          </span>
+        )}
+        {isInToday && !showTodayBadge && (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-primary/10 text-primary">
+            <Sun className="w-2.5 h-2.5" />
+            Today
+          </span>
+        )}
       </div>
-      {showDelete && onDelete && (
-        <button
-          onClick={onDelete}
-          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      )}
+      <div className="flex items-center gap-1">
+        {/* Bring to Today action */}
+        {onBringToToday && !task.completed && (
+          <button
+            onClick={onBringToToday}
+            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+            title="Bring to Today"
+          >
+            <ArrowUpRight className="w-4 h-4" />
+          </button>
+        )}
+        {/* Remove from Today action */}
+        {onRemoveFromToday && !task.completed && (
+          <button
+            onClick={onRemoveFromToday}
+            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted-foreground hover:text-muted-foreground/70 hover:bg-muted transition-all"
+            title="Remove from Today"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+        {showDelete && onDelete && (
+          <button
+            onClick={onDelete}
+            className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
+      </div>
     </motion.div>
   );
 }
