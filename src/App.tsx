@@ -8,6 +8,8 @@ import TodayPage from "./pages/Today";
 import TasksPage from "./pages/Tasks";
 import HabitsPage from "./pages/Habits";
 import WeeklyReviewPage from "./pages/WeeklyReview";
+import WeeklyArchivePage from "./pages/WeeklyArchive";
+import WeeklyArchiveDetailPage from "./pages/WeeklyArchiveDetail";
 import AccountPage from "./pages/Account";
 import LoginPage from "./pages/Login";
 import PaywallPage from "./pages/Paywall";
@@ -29,6 +31,8 @@ const App = () => (
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/habits" element={<HabitsPage />} />
             <Route path="/weekly" element={<WeeklyReviewPage />} />
+            <Route path="/weekly/archive" element={<WeeklyArchivePage />} />
+            <Route path="/weekly/archive/:weekStart" element={<WeeklyArchiveDetailPage />} />
             <Route path="/account" element={<AccountPage />} />
           </Route>
           <Route path="/" element={<LoginPage />} />
