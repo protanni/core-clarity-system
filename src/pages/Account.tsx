@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CreditCard, User, LogOut, Pencil } from "lucide-react";
+import { CreditCard, User, LogOut, Pencil, Sun, Moon, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
 
 const container = {
   hidden: { opacity: 0 },
@@ -16,8 +17,15 @@ const item = {
   show: { opacity: 1, y: 0 },
 };
 
+const themeOptions = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "system", label: "System", icon: Monitor },
+] as const;
+
 export default function AccountPage() {
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   const handleManagePlan = () => {
     navigate("/pricing");
@@ -70,6 +78,36 @@ export default function AccountPage() {
             >
               Manage plan
             </Button>
+          </div>
+        </motion.div>
+
+        {/* Appearance Card */}
+        <motion.div
+          variants={item}
+          className="bg-card rounded-2xl p-5 shadow-card border border-border/50 space-y-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+              <Sun className="w-4 h-4 text-primary" />
+            </div>
+            <h2 className="text-base font-medium text-foreground">Appearance</h2>
+          </div>
+
+          <div className="flex gap-2">
+            {themeOptions.map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                onClick={() => setTheme(value)}
+                className={`flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl text-xs font-medium transition-colors ${
+                  theme === value
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : "bg-muted/50 text-muted-foreground border border-transparent hover:bg-muted"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </button>
+            ))}
           </div>
         </motion.div>
 

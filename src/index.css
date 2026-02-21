@@ -80,62 +80,70 @@
   }
 
   .dark {
-    --background: 220 20% 10%;
-    --foreground: 40 20% 95%;
+    /* Deep warm-neutral base — never pure black */
+    --background: 220 18% 9%;
+    --foreground: 40 15% 92%;
 
-    --card: 220 20% 13%;
-    --card-foreground: 40 20% 95%;
+    /* Elevated surfaces */
+    --card: 220 16% 13%;
+    --card-foreground: 40 15% 92%;
 
-    --popover: 220 20% 13%;
-    --popover-foreground: 40 20% 95%;
+    --popover: 220 16% 14%;
+    --popover-foreground: 40 15% 92%;
 
-    --primary: 158 35% 50%;
-    --primary-foreground: 220 20% 10%;
-    --primary-soft: 158 25% 20%;
+    /* Primary: sage green, slightly lifted for dark contrast */
+    --primary: 158 32% 48%;
+    --primary-foreground: 220 18% 9%;
+    --primary-soft: 158 20% 18%;
 
-    --secondary: 220 15% 20%;
-    --secondary-foreground: 40 20% 90%;
+    /* Secondary */
+    --secondary: 220 14% 18%;
+    --secondary-foreground: 40 15% 85%;
 
-    --muted: 220 15% 18%;
-    --muted-foreground: 220 10% 55%;
+    /* Muted */
+    --muted: 220 14% 16%;
+    --muted-foreground: 220 8% 55%;
 
-    --accent: 158 20% 22%;
-    --accent-foreground: 158 35% 70%;
+    /* Accent */
+    --accent: 158 18% 18%;
+    --accent-foreground: 158 30% 68%;
 
-    --destructive: 0 50% 45%;
+    /* Destructive */
+    --destructive: 0 50% 48%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 20%;
-    --input: 220 15% 20%;
-    --ring: 158 35% 50%;
+    /* Borders — subtle, low opacity feel */
+    --border: 220 12% 20%;
+    --input: 220 12% 20%;
+    --ring: 158 32% 48%;
 
-    /* Mood colors - dark mode */
-    --mood-great: 158 30% 25%;
-    --mood-great-foreground: 158 40% 75%;
-    --mood-good: 180 25% 25%;
-    --mood-good-foreground: 180 35% 75%;
-    --mood-neutral: 45 20% 22%;
-    --mood-neutral-foreground: 45 25% 75%;
-    --mood-low: 25 25% 22%;
-    --mood-low-foreground: 25 30% 75%;
-    --mood-bad: 0 25% 22%;
-    --mood-bad-foreground: 0 35% 75%;
+    /* Mood colors — desaturated for dark surfaces */
+    --mood-great: 158 25% 22%;
+    --mood-great-foreground: 158 35% 72%;
+    --mood-good: 180 20% 22%;
+    --mood-good-foreground: 180 30% 72%;
+    --mood-neutral: 45 18% 20%;
+    --mood-neutral-foreground: 45 22% 72%;
+    --mood-low: 25 22% 20%;
+    --mood-low-foreground: 25 28% 72%;
+    --mood-bad: 0 22% 20%;
+    --mood-bad-foreground: 0 30% 72%;
 
-    /* Navigation - dark */
-    --nav-background: 220 20% 12%;
-    --nav-border: 220 15% 18%;
-    --nav-active: 158 35% 55%;
-    --nav-inactive: 220 10% 50%;
+    /* Navigation */
+    --nav-background: 220 16% 11%;
+    --nav-border: 220 12% 18%;
+    --nav-active: 158 32% 52%;
+    --nav-inactive: 220 8% 48%;
 
-    /* Sidebar dark */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    /* Sidebar */
+    --sidebar-background: 220 18% 10%;
+    --sidebar-foreground: 40 15% 92%;
+    --sidebar-primary: 158 32% 48%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 220 14% 16%;
+    --sidebar-accent-foreground: 40 15% 92%;
+    --sidebar-border: 220 12% 18%;
+    --sidebar-ring: 158 32% 48%;
   }
 }
 
