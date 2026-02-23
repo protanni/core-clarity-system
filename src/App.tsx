@@ -15,6 +15,7 @@ import AccountPage from "./pages/Account";
 import LoginPage from "./pages/Login";
 import PaywallPage from "./pages/Paywall";
 import NotFound from "./pages/NotFound";
+import SmartSubtasksPrototype from "./pages/SmartSubtasksPrototype";
 import { seedDemoData } from "./lib/seedData";
 
 // Seed demo data for archive preview
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/weekly/archive" element={<WeeklyArchivePage />} />
               <Route path="/weekly/archive/:weekStart" element={<WeeklyArchiveDetailPage />} />
               <Route path="/account" element={<AccountPage />} />
+              <Route path="/smart-subtasks" element={<SmartSubtasksPrototype />} />
             </Route>
             <Route path="/" element={<LoginPage />} />
             <Route path="*" element={<NotFound />} />
