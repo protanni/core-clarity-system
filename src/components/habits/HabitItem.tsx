@@ -54,7 +54,6 @@ export function HabitItem({
           >
             {habit.name}
           </span>
-          {showArea && habit.area && <AreaTag area={habit.area} />}
         </div>
         {showProgress && (
           <ProgressDots
@@ -64,14 +63,23 @@ export function HabitItem({
           />
         )}
       </div>
-      {showDelete && onDelete && (
-        <button
-          onClick={onDelete}
-          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      )}
+      <div className="relative w-16 h-8 flex-shrink-0 flex items-center justify-end">
+        {showArea && habit.area && (
+          <div className="absolute inset-0 flex items-center justify-end transition-opacity duration-200 group-hover:opacity-0">
+            <AreaTag area={habit.area} />
+          </div>
+        )}
+        {showDelete && onDelete && (
+          <div className="absolute inset-0 flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              onClick={onDelete}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
     </motion.div>
   );
 }
