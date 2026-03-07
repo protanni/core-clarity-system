@@ -16,6 +16,7 @@ import LoginPage from "./pages/Login";
 import PaywallPage from "./pages/Paywall";
 import NotFound from "./pages/NotFound";
 import SmartSubtasksPrototype from "./pages/SmartSubtasksPrototype";
+import MoodExploration from "./pages/MoodExploration";
 import { seedDemoData } from "./lib/seedData";
 
 // Seed demo data for archive preview
@@ -33,6 +34,7 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/pricing" element={<PaywallPage />} />
+            <Route path="/mood-exploration" element={<MoodExploration />} />
             <Route element={<AppLayout />}>
               <Route path="/app" element={<TodayPage />} />
               <Route path="/tasks" element={<TasksPage />} />
