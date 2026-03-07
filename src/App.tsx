@@ -34,6 +34,7 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/pricing" element={<PaywallPage />} />
+            <Route path="/mood-exploration" element={<MoodExploration />} />
             <Route element={<AppLayout />}>
               <Route path="/app" element={<TodayPage />} />
               <Route path="/tasks" element={<TasksPage />} />
@@ -43,7 +44,6 @@ const App = () => (
               <Route path="/weekly/archive/:weekStart" element={<WeeklyArchiveDetailPage />} />
               <Route path="/account" element={<AccountPage />} />
               <Route path="/smart-subtasks" element={<SmartSubtasksPrototype />} />
-              <Route path="/mood-exploration" element={<MoodExploration />} />
             </Route>
             <Route path="/" element={<LoginPage />} />
             <Route path="*" element={<NotFound />} />
