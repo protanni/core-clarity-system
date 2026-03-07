@@ -16,6 +16,7 @@ import LoginPage from "./pages/Login";
 import PaywallPage from "./pages/Paywall";
 import NotFound from "./pages/NotFound";
 import SmartSubtasksPrototype from "./pages/SmartSubtasksPrototype";
+import MoodExploration from "./pages/MoodExploration";
 import { seedDemoData } from "./lib/seedData";
 
 // Seed demo data for archive preview
