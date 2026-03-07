@@ -43,6 +43,7 @@ const App = () => (
               <Route path="/weekly/archive/:weekStart" element={<WeeklyArchiveDetailPage />} />
               <Route path="/account" element={<AccountPage />} />
               <Route path="/smart-subtasks" element={<SmartSubtasksPrototype />} />
+              <Route path="/mood-exploration" element={<MoodExploration />} />
             </Route>
             <Route path="/" element={<LoginPage />} />
             <Route path="*" element={<NotFound />} />
