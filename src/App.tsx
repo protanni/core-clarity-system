@@ -14,6 +14,7 @@ import WeeklyArchiveDetailPage from "./pages/WeeklyArchiveDetail";
 import AccountPage from "./pages/Account";
 import LoginPage from "./pages/Login";
 import PaywallPage from "./pages/Paywall";
+import LandingPage from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import SmartSubtasksPrototype from "./pages/SmartSubtasksPrototype";
 import MoodExploration from "./pages/MoodExploration";
@@ -32,6 +33,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/landing" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/pricing" element={<PaywallPage />} />
             <Route path="/mood-exploration" element={<MoodExploration />} />
