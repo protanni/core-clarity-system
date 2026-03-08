@@ -118,16 +118,16 @@
     --ring: 158 32% 48%;
 
     /* Mood colors — desaturated for dark surfaces */
-    --mood-great: 158 25% 22%;
-    --mood-great-foreground: 158 35% 72%;
-    --mood-good: 180 20% 22%;
-    --mood-good-foreground: 180 30% 72%;
-    --mood-neutral: 45 18% 20%;
-    --mood-neutral-foreground: 45 22% 72%;
-    --mood-low: 25 22% 20%;
-    --mood-low-foreground: 25 28% 72%;
-    --mood-bad: 0 22% 20%;
-    --mood-bad-foreground: 0 30% 72%;
+    --mood-great: 158 30% 26%;
+    --mood-great-foreground: 158 40% 78%;
+    --mood-good: 180 25% 25%;
+    --mood-good-foreground: 180 35% 78%;
+    --mood-neutral: 45 22% 24%;
+    --mood-neutral-foreground: 45 28% 78%;
+    --mood-low: 25 28% 24%;
+    --mood-low-foreground: 25 34% 76%;
+    --mood-bad: 0 28% 24%;
+    --mood-bad-foreground: 0 35% 76%;
 
     /* Navigation */
     --nav-background: 220 16% 11%;
