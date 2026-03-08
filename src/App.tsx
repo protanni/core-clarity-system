@@ -14,6 +14,7 @@ import WeeklyArchiveDetailPage from "./pages/WeeklyArchiveDetail";
 import AccountPage from "./pages/Account";
 import LoginPage from "./pages/Login";
 import PaywallPage from "./pages/Paywall";
+import LandingPage from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import SmartSubtasksPrototype from "./pages/SmartSubtasksPrototype";
 import MoodExploration from "./pages/MoodExploration";
