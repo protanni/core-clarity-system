@@ -414,8 +414,7 @@ export default function LandingPage() {
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const heroY1 = useTransform(heroProgress, [0, 1], [0, -20]); // center
-  const heroY2 = useTransform(heroProgress, [0, 1], [0, -12]); // sides
+  const heroY1 = useTransform(heroProgress, [0, 1], [0, -20]);
 
   /* Scroll-linked horizontal drift for product preview */
   const previewRef = useRef<HTMLDivElement>(null);
