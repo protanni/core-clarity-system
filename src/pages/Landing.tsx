@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import {
@@ -320,6 +320,90 @@ function MockReviewScreen() {
   );
 }
 
+/* ─── Hero Phone Stack ─── */
+
+const HERO_SCREEN_LABELS = ["Today", "Tasks", "Habits"] as const;
+
+const DEPTH_CONFIG = [
+  { scale: 1,     y: 0,  opacity: 1,    zIndex: 30 },
+  { scale: 0.934, y: 20, opacity: 0.36, zIndex: 20 },
+  { scale: 0.868, y: 38, opacity: 0.16, zIndex: 10 },
+];
+
+function HeroPhoneStack() {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % HERO_SCREEN_LABELS.length);
+    }, 3800);
+    return () => clearInterval(id);
+  }, []);
+
+  const mockScreens = [
+    <MockTodayScreen />,
+    <MockTasksScreen />,
+    <MockHabitsScreen />,
+  ];
+
+  return (
+    <div className="flex flex-col items-center">
+      {/* Fixed container — all screens stack inside */}
+      <div className="relative" style={{ width: 244, height: 422 }}>
+        {mockScreens.map((comp, i) => {
+          const depth = (i - activeIndex + HERO_SCREEN_LABELS.length) % HERO_SCREEN_LABELS.length;
+          const cfg = DEPTH_CONFIG[depth];
+          return (
+            <motion.div
+              key={HERO_SCREEN_LABELS[i]}
+              className="absolute inset-x-0 top-0 flex justify-center"
+              style={{ zIndex: cfg.zIndex }}
+              animate={{ scale: cfg.scale, y: cfg.y, opacity: cfg.opacity }}
+              transition={{ duration: 1.1, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <div className="relative">
+                {depth === 0 && (
+                  <div className="absolute -inset-10 bg-primary/5 rounded-3xl blur-3xl -z-10 pointer-events-none" />
+                )}
+                {comp}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Label + pill indicators */}
+      <div className="mt-8 flex flex-col items-center gap-3">
+        <motion.p
+          key={activeIndex}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+          className="text-[10px] font-medium text-muted-foreground/55 tracking-[0.18em] uppercase"
+        >
+          {HERO_SCREEN_LABELS[activeIndex]}
+        </motion.p>
+        <div className="flex items-center gap-1.5">
+          {HERO_SCREEN_LABELS.map((label, i) => (
+            <button
+              key={label}
+              onClick={() => setActiveIndex(i)}
+              className="focus:outline-none"
+              aria-label={`View ${label}`}
+            >
+              <motion.div
+                className={`rounded-full ${i === activeIndex ? "bg-primary" : "bg-foreground/20"}`}
+                animate={{ width: i === activeIndex ? 18 : 5, height: 5 }}
+                transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1] }}
+              />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main Landing Page ─── */
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -330,8 +414,7 @@ export default function LandingPage() {
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const heroY1 = useTransform(heroProgress, [0, 1], [0, -20]); // center
-  const heroY2 = useTransform(heroProgress, [0, 1], [0, -12]); // sides
+  const heroY1 = useTransform(heroProgress, [0, 1], [0, -20]);
 
   /* Scroll-linked horizontal drift for product preview */
   const previewRef = useRef<HTMLDivElement>(null);
@@ -407,50 +490,16 @@ export default function LandingPage() {
             </motion.div>
           </motion.div>
 
-          {/* Mockup trio with parallax */}
-          <div className="mt-20 flex justify-center">
-            <div className="flex items-end gap-5 md:gap-8">
-
-              {/* Left */}
-              <motion.div
-                className="hidden md:block"
-                style={{ y: heroY2 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-              >
-                <div className="-translate-y-6">
-                  <MockTasksScreen />
-                </div>
-              </motion.div>
-
-              {/* Center – Today (featured) */}
-              <motion.div
-                style={{ y: heroY1 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
-                className="relative"
-              >
-                <MockTodayScreen />
-                <div className="absolute -inset-8 bg-primary/6 rounded-3xl blur-3xl -z-10" />
-              </motion.div>
-
-              {/* Right */}
-              <motion.div
-                className="hidden md:block"
-                style={{ y: heroY2 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-              >
-                <div className="-translate-y-6">
-                  <MockHabitsScreen />
-                </div>
-              </motion.div>
-
-            </div>
-          </div>
+          {/* Layered phone stack — depth rotation */}
+          <motion.div
+            className="mt-20 flex justify-center"
+            style={{ y: heroY1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+          >
+            <HeroPhoneStack />
+          </motion.div>
         </div>
       </section>
 
