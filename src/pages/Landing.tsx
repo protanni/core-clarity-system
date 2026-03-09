@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import {
   CheckSquare,
   Repeat,
@@ -23,8 +23,8 @@ import { Button } from "@/components/ui/button";
 
 /* ─── animation helpers ─── */
 const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as const } },
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as const } },
 };
 
 const stagger = {
@@ -324,22 +324,43 @@ function MockReviewScreen() {
 export default function LandingPage() {
   const navigate = useNavigate();
 
-  /* Scroll-linked parallax for hero mockups */
+  /* Hero depth animation — cycles Today → Tasks → Habits */
+  const [activeHeroIdx, setActiveHeroIdx] = useState(0); // 0=Today, 1=Tasks, 2=Habits
+  useEffect(() => {
+    const id = setInterval(() => setActiveHeroIdx((i) => (i + 1) % 3), 3000);
+    return () => clearInterval(id);
+  }, []);
+
+  /* Dark island crossfade */
+  const [showDark, setShowDark] = useState(false);
+  useEffect(() => {
+    const id = setInterval(() => setShowDark((d) => !d), 3500);
+    return () => clearInterval(id);
+  }, []);
+
+  /* Scroll refs */
   const heroRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  /* Hero scroll progress for parallax */
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroRef,
     offset: ["start start", "end start"],
   });
-  const heroY1 = useTransform(heroProgress, [0, 1], [0, -20]); // center
-  const heroY2 = useTransform(heroProgress, [0, 1], [0, -12]); // sides
+  const heroY1 = useTransform(heroProgress, [0, 1], [0, -20]);
+  const heroY2 = useTransform(heroProgress, [0, 1], [0, -12]);
 
-  /* Scroll-linked horizontal drift for product preview */
-  const previewRef = useRef<HTMLDivElement>(null);
+  /* Product preview — staggered horizontal drift per card */
   const { scrollYProgress: previewProgress } = useScroll({
     target: previewRef,
     offset: ["start end", "end start"],
   });
-  const previewX = useTransform(previewProgress, [0, 1], [24, -24]);
+  const px0 = useTransform(previewProgress, [0, 1], [55, -25]); // 80px range
+  const px1 = useTransform(previewProgress, [0, 1], [45, -20]); // 65px range
+  const px2 = useTransform(previewProgress, [0, 1], [36, -14]); // 50px range
+  const px3 = useTransform(previewProgress, [0, 1], [28, -8]);  // 36px range
+
+  const depthTransition = { duration: 0.8, ease: [0.4, 0, 0.2, 1] as const };
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -361,6 +382,32 @@ export default function LandingPage() {
 
       {/* ─── HERO ─── */}
       <section ref={heroRef} className="relative overflow-hidden">
+
+        {/* Radial background glows — barely perceptible, < 5% opacity */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+          <div
+            className="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full"
+            style={{
+              background: "radial-gradient(ellipse, hsl(158 35% 45% / 0.05) 0%, transparent 65%)",
+              filter: "blur(40px)",
+            }}
+          />
+          <div
+            className="absolute top-[18%] right-[18%] w-[380px] h-[380px] rounded-full"
+            style={{
+              background: "radial-gradient(ellipse, hsl(210 35% 60% / 0.03) 0%, transparent 70%)",
+              filter: "blur(70px)",
+            }}
+          />
+          <div
+            className="absolute bottom-[8%] left-[12%] w-[320px] h-[320px] rounded-full"
+            style={{
+              background: "radial-gradient(ellipse, hsl(45 40% 70% / 0.025) 0%, transparent 70%)",
+              filter: "blur(50px)",
+            }}
+          />
+        </div>
+
         <div className="max-w-5xl mx-auto px-6 pt-24 pb-20 md:pt-40 md:pb-32">
 
           {/* Text block */}
@@ -407,50 +454,98 @@ export default function LandingPage() {
             </motion.div>
           </motion.div>
 
-          {/* Mockup trio with parallax */}
+          {/* Mockup trio — layered depth animation */}
           <div className="mt-20 flex justify-center">
             <div className="flex items-end gap-5 md:gap-8">
 
-              {/* Left */}
+              {/* Left — Tasks (depth index 1) */}
               <motion.div
                 className="hidden md:block"
                 style={{ y: heroY2 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
               >
-                <div className="-translate-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: -12 }}
+                  animate={{
+                    opacity: activeHeroIdx === 1 ? 1 : 0.45,
+                    scale: activeHeroIdx === 1 ? 1 : 0.96,
+                    filter: activeHeroIdx === 1 ? "blur(0px)" : "blur(1px)",
+                    y: activeHeroIdx === 1 ? -24 : -12,
+                  }}
+                  transition={depthTransition}
+                >
                   <MockTasksScreen />
-                </div>
+                </motion.div>
               </motion.div>
 
-              {/* Center – Today (featured) */}
-              <motion.div
-                style={{ y: heroY1 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
-                className="relative"
-              >
-                <MockTodayScreen />
-                <div className="absolute -inset-8 bg-primary/6 rounded-3xl blur-3xl -z-10" />
+              {/* Center — Today (depth index 0) */}
+              <motion.div style={{ y: heroY1 }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{
+                    opacity: activeHeroIdx === 0 ? 1 : 0.45,
+                    scale: activeHeroIdx === 0 ? 1 : 0.96,
+                    filter: activeHeroIdx === 0 ? "blur(0px)" : "blur(1px)",
+                    y: activeHeroIdx === 0 ? 0 : 12,
+                  }}
+                  transition={depthTransition}
+                  className="relative"
+                >
+                  <MockTodayScreen />
+                  {/* Ambient glow behind center screen */}
+                  <motion.div
+                    className="absolute -inset-8 rounded-3xl blur-3xl -z-10"
+                    animate={{
+                      opacity: activeHeroIdx === 0 ? 1 : 0.3,
+                      background: "hsl(158 35% 45% / 0.06)",
+                    }}
+                    transition={depthTransition}
+                  />
+                </motion.div>
               </motion.div>
 
-              {/* Right */}
+              {/* Right — Habits (depth index 2) */}
               <motion.div
                 className="hidden md:block"
                 style={{ y: heroY2 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
               >
-                <div className="-translate-y-6">
+                <motion.div
+                  initial={{ opacity: 0, y: -12 }}
+                  animate={{
+                    opacity: activeHeroIdx === 2 ? 1 : 0.45,
+                    scale: activeHeroIdx === 2 ? 1 : 0.96,
+                    filter: activeHeroIdx === 2 ? "blur(0px)" : "blur(1px)",
+                    y: activeHeroIdx === 2 ? -24 : -12,
+                  }}
+                  transition={depthTransition}
+                >
                   <MockHabitsScreen />
-                </div>
+                </motion.div>
               </motion.div>
 
             </div>
           </div>
+
+          {/* Depth indicator dots */}
+          <motion.div
+            className="flex items-center justify-center gap-1.5 mt-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1, duration: 0.5 }}
+          >
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="rounded-full bg-primary"
+                animate={{
+                  width: activeHeroIdx === i ? 16 : 6,
+                  opacity: activeHeroIdx === i ? 0.8 : 0.25,
+                }}
+                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+                style={{ height: 6 }}
+              />
+            ))}
+          </motion.div>
+
         </div>
       </section>
 
@@ -481,25 +576,23 @@ export default function LandingPage() {
             </motion.p>
           </motion.div>
 
-          {/* Horizontal drift wrapper */}
+          {/* Staggered horizontal drift — each card has a slightly different speed */}
           <div className="overflow-hidden">
-            <motion.div
-              style={{ x: previewX }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 justify-items-center"
-            >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 justify-items-center">
               {[
-                { label: "Today", comp: <MockTodayScreen />, delay: 0 },
-                { label: "Tasks", comp: <MockTasksScreen />, delay: 0.07 },
-                { label: "Habits", comp: <MockHabitsScreen />, delay: 0.14 },
-                { label: "Review", comp: <MockReviewScreen />, delay: 0.21 },
+                { label: "Today", comp: <MockTodayScreen />, x: px0, delay: 0 },
+                { label: "Tasks", comp: <MockTasksScreen />, x: px1, delay: 0.07 },
+                { label: "Habits", comp: <MockHabitsScreen />, x: px2, delay: 0.14 },
+                { label: "Review", comp: <MockReviewScreen />, x: px3, delay: 0.21 },
               ].map((screen) => (
                 <motion.div
                   key={screen.label}
+                  style={{ x: screen.x }}
                   className="space-y-3 flex flex-col items-center"
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.55, delay: screen.delay, ease: [0.25, 0.1, 0.25, 1] }}
+                  transition={{ duration: 0.6, delay: screen.delay, ease: [0.25, 0.1, 0.25, 1] }}
                 >
                   <div className="transform scale-[0.82] md:scale-100 origin-top">
                     {screen.comp}
@@ -507,7 +600,7 @@ export default function LandingPage() {
                   <p className="text-xs font-medium text-muted-foreground">{screen.label}</p>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -624,41 +717,58 @@ export default function LandingPage() {
             </motion.p>
           </motion.div>
 
+          {/* Cards with ambient glow behind + premium hover */}
           <motion.div
-            className="grid sm:grid-cols-2 gap-5"
             variants={stagger}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
+            className="relative"
           >
-            {[
-              {
-                icon: Sparkles,
-                title: "Daily Focus",
-                desc: "Create a personalized daily focus using your tasks, habits and recent activity.",
-              },
-              {
-                icon: Wand2,
-                title: "Smart task breakdown",
-                desc: "Turn overwhelming tasks into clear next steps. Protanni can break complex tasks into smaller, actionable subtasks so you can start moving forward immediately.",
-              },
-            ].map((f) => {
-              const Icon = f.icon;
-              return (
-                <motion.div
-                  key={f.title}
-                  variants={fadeUp}
-                  whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                  className="bg-card rounded-xl p-6 border border-border/50 shadow-card space-y-3 cursor-default"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-primary" strokeWidth={1.75} />
-                  </div>
-                  <h3 className="text-sm font-semibold text-foreground">{f.title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
-                </motion.div>
-              );
-            })}
+            {/* Subtle sage glow behind AI cards */}
+            <div
+              className="absolute inset-0 -m-10 rounded-3xl pointer-events-none"
+              style={{
+                background: "radial-gradient(ellipse at center, hsl(158 35% 45% / 0.07) 0%, transparent 68%)",
+                filter: "blur(24px)",
+              }}
+              aria-hidden
+            />
+
+            <div className="grid sm:grid-cols-2 gap-5 relative z-10">
+              {[
+                {
+                  icon: Sparkles,
+                  title: "Daily Focus",
+                  desc: "Create a personalized daily focus using your tasks, habits and recent activity.",
+                },
+                {
+                  icon: Wand2,
+                  title: "Smart task breakdown",
+                  desc: "Turn overwhelming tasks into clear next steps. Protanni can break complex tasks into smaller, actionable subtasks so you can start moving forward immediately.",
+                },
+              ].map((f) => {
+                const Icon = f.icon;
+                return (
+                  <motion.div
+                    key={f.title}
+                    variants={fadeUp}
+                    whileHover={{
+                      y: -4,
+                      boxShadow: "0 16px 40px -8px hsl(158 35% 45% / 0.12)",
+                      transition: { duration: 0.18 },
+                    }}
+                    className="bg-card rounded-xl p-6 border border-border/50 shadow-card space-y-3 cursor-default"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-4 h-4 text-primary" strokeWidth={1.75} />
+                    </div>
+                    <h3 className="text-sm font-semibold text-foreground">{f.title}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
+                  </motion.div>
+                );
+              })}
+            </div>
           </motion.div>
         </div>
       </section>
@@ -731,7 +841,12 @@ export default function LandingPage() {
                 <motion.div
                   key={f.title}
                   variants={fadeUp}
-                  whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                  whileHover={{
+                    scale: 1.02,
+                    y: -4,
+                    boxShadow: "0 12px 36px -8px hsl(var(--foreground) / 0.1)",
+                    transition: { duration: 0.18 },
+                  }}
                   className="bg-card rounded-xl p-6 shadow-card border border-border/50 space-y-3 cursor-default"
                 >
                   <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -746,64 +861,231 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── LIGHT & DARK MODE ─── */}
-      <section className="py-24 md:py-32 bg-muted/30">
-        <div className="max-w-3xl mx-auto px-6">
+      {/* ─── DARK ISLAND — Designed for Day and Night ─── */}
+      <section
+        className="py-24 md:py-32 relative overflow-hidden"
+        style={{ backgroundColor: "hsl(220 18% 10%)" }}
+      >
+        {/* Ambient glow inside dark island */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden>
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full"
+            style={{
+              background: "radial-gradient(ellipse, hsl(158 30% 35% / 0.08) 0%, transparent 65%)",
+              filter: "blur(60px)",
+            }}
+          />
+          <div
+            className="absolute top-0 right-1/4 w-[300px] h-[300px] rounded-full"
+            style={{
+              background: "radial-gradient(ellipse, hsl(210 40% 50% / 0.04) 0%, transparent 70%)",
+              filter: "blur(80px)",
+            }}
+          />
+        </div>
+
+        <div className="max-w-3xl mx-auto px-6 relative z-10">
+
+          {/* Header */}
           <motion.div
-            className="text-center space-y-4 mb-14"
+            className="text-center space-y-5 mb-14"
             variants={stagger}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
           >
-            <motion.div variants={fadeUp} className="flex items-center justify-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-background border border-border/60 flex items-center justify-center shadow-sm">
-                <Sun className="w-3.5 h-3.5 text-foreground" />
-              </div>
-              <div className="w-7 h-7 rounded-full bg-[hsl(220,18%,9%)] flex items-center justify-center shadow-sm">
-                <Moon className="w-3.5 h-3.5 text-[hsl(40,15%,70%)]" />
-              </div>
+            {/* Animated theme toggle pill */}
+            <motion.div variants={fadeUp} className="flex items-center justify-center">
+              <button
+                onClick={() => setShowDark((d) => !d)}
+                className="relative flex items-center rounded-full p-1 cursor-pointer select-none"
+                style={{
+                  border: "1px solid hsl(220 12% 24%)",
+                  backgroundColor: "hsl(220 16% 14%)",
+                }}
+                aria-label="Toggle theme preview"
+              >
+                {/* Sliding pill indicator */}
+                <motion.div
+                  className="absolute rounded-full"
+                  style={{
+                    width: 30,
+                    height: 30,
+                    top: 4,
+                    left: 4,
+                    backgroundColor: "hsl(220 14% 22%)",
+                    boxShadow: "0 1px 4px hsl(0 0% 0% / 0.35)",
+                  }}
+                  animate={{ x: showDark ? 34 : 0 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 28 }}
+                />
+                {/* Sun */}
+                <div
+                  className="relative z-10 flex items-center justify-center"
+                  style={{ width: 38, height: 38 }}
+                >
+                  <Sun
+                    size={14}
+                    style={{ color: showDark ? "hsl(220 8% 38%)" : "hsl(38 70% 62%)" }}
+                  />
+                </div>
+                {/* Moon */}
+                <div
+                  className="relative z-10 flex items-center justify-center"
+                  style={{ width: 38, height: 38 }}
+                >
+                  <Moon
+                    size={14}
+                    style={{ color: showDark ? "hsl(210 50% 72%)" : "hsl(220 8% 38%)" }}
+                  />
+                </div>
+              </button>
             </motion.div>
+
             <motion.h2
               variants={fadeUp}
-              className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight"
+              className="text-2xl md:text-3xl font-semibold tracking-tight"
+              style={{ color: "hsl(40 15% 92%)" }}
             >
               Designed for day and night
             </motion.h2>
             <motion.p
               variants={fadeUp}
-              className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto"
+              className="text-sm leading-relaxed max-w-md mx-auto"
+              style={{ color: "hsl(220 8% 58%)" }}
             >
               Choose the interface that feels best for you. Protanni supports both light and dark mode
               while keeping the same calm, clear experience.
             </motion.p>
           </motion.div>
 
-          {/* Light dominant, dark secondary */}
+          {/* Phone previews — primary crossfades, secondary mirrors */}
           <motion.div
-            className="flex justify-center items-end gap-8 md:gap-14"
+            className="flex justify-center items-end gap-8 md:gap-16"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            {/* Light – primary */}
-            <div className="flex flex-col items-center gap-3">
-              <MockTodayScreen />
-              <div className="flex items-center gap-1.5">
-                <Sun className="w-3 h-3 text-muted-foreground" />
-                <p className="text-[10px] font-medium text-muted-foreground">Light — default</p>
+            {/* Primary phone — crossfades between light and dark */}
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative" style={{ width: 220, height: 380 }}>
+                {/* Light variant */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{ opacity: showDark ? 0 : 1 }}
+                  transition={{ duration: 0.75, ease: "easeInOut" }}
+                >
+                  <MockTodayScreen />
+                </motion.div>
+                {/* Dark variant */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{ opacity: showDark ? 1 : 0 }}
+                  transition={{ duration: 0.75, ease: "easeInOut" }}
+                >
+                  <MockTodayScreen dark />
+                </motion.div>
+              </div>
+
+              {/* Label crossfade */}
+              <div style={{ height: 20, position: "relative" }}>
+                <AnimatePresence mode="wait">
+                  {showDark ? (
+                    <motion.div
+                      key="dark-label"
+                      className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2"
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.28 }}
+                    >
+                      <Moon size={11} style={{ color: "hsl(220 8% 52%)" }} />
+                      <p className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(220 8% 52%)" }}>
+                        Dark mode
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="light-label"
+                      className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2"
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.28 }}
+                    >
+                      <Sun size={11} style={{ color: "hsl(220 8% 52%)" }} />
+                      <p className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(220 8% 52%)" }}>
+                        Light mode
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
-            {/* Dark – secondary */}
-            <div className="flex flex-col items-center gap-3">
-              <div className="transform scale-[0.78] origin-bottom opacity-70">
-                <MockTodayScreen dark />
+            {/* Secondary phone — shows the opposite state, smaller and dimmed */}
+            <div className="flex flex-col items-center gap-4">
+              <div
+                style={{
+                  width: 220,
+                  height: 380,
+                  transform: "scale(0.78)",
+                  transformOrigin: "bottom center",
+                  opacity: 0.45,
+                }}
+                className="relative"
+              >
+                {/* Opposite: light when primary is dark, dark when primary is light */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{ opacity: showDark ? 1 : 0 }}
+                  transition={{ duration: 0.75, ease: "easeInOut" }}
+                >
+                  <MockTodayScreen />
+                </motion.div>
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{ opacity: showDark ? 0 : 1 }}
+                  transition={{ duration: 0.75, ease: "easeInOut" }}
+                >
+                  <MockTodayScreen dark />
+                </motion.div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <Moon className="w-3 h-3 text-muted-foreground" />
-                <p className="text-[10px] font-medium text-muted-foreground">Dark — also available</p>
+
+              {/* Opposite label */}
+              <div style={{ height: 20, position: "relative", opacity: 0.45 }}>
+                <AnimatePresence mode="wait">
+                  {showDark ? (
+                    <motion.div
+                      key="light-label-2"
+                      className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2"
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.28 }}
+                    >
+                      <Sun size={11} style={{ color: "hsl(220 8% 52%)" }} />
+                      <p className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(220 8% 52%)" }}>
+                        Light mode
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="dark-label-2"
+                      className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2"
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.28 }}
+                    >
+                      <Moon size={11} style={{ color: "hsl(220 8% 52%)" }} />
+                      <p className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(220 8% 52%)" }}>
+                        Dark mode
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           </motion.div>
@@ -886,7 +1168,12 @@ export default function LandingPage() {
             {/* Free */}
             <motion.div
               variants={fadeUp}
-              className="bg-card rounded-xl p-7 shadow-card border border-border/50 space-y-5 flex flex-col"
+              whileHover={{
+                scale: 1.01,
+                y: -3,
+                transition: { duration: 0.18 },
+              }}
+              className="bg-card rounded-xl p-7 shadow-card border border-border/50 space-y-5 flex flex-col cursor-default"
             >
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Free</h3>
@@ -915,7 +1202,12 @@ export default function LandingPage() {
             {/* Pro */}
             <motion.div
               variants={fadeUp}
-              className="bg-card rounded-xl p-7 shadow-card border-2 border-primary/25 space-y-5 relative flex flex-col"
+              whileHover={{
+                scale: 1.01,
+                y: -3,
+                transition: { duration: 0.18 },
+              }}
+              className="bg-card rounded-xl p-7 shadow-card border-2 border-primary/25 space-y-5 relative flex flex-col cursor-default"
             >
               <div className="absolute -top-3 left-6 px-3 py-1 bg-primary text-primary-foreground text-[9px] font-medium rounded-full">
                 Recommended
