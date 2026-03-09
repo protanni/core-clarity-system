@@ -490,50 +490,16 @@ export default function LandingPage() {
             </motion.div>
           </motion.div>
 
-          {/* Mockup trio with parallax */}
-          <div className="mt-20 flex justify-center">
-            <div className="flex items-end gap-5 md:gap-8">
-
-              {/* Left */}
-              <motion.div
-                className="hidden md:block"
-                style={{ y: heroY2 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-              >
-                <div className="-translate-y-6">
-                  <MockTasksScreen />
-                </div>
-              </motion.div>
-
-              {/* Center – Today (featured) */}
-              <motion.div
-                style={{ y: heroY1 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.7, delay: 0.2 }}
-                className="relative"
-              >
-                <MockTodayScreen />
-                <div className="absolute -inset-8 bg-primary/6 rounded-3xl blur-3xl -z-10" />
-              </motion.div>
-
-              {/* Right */}
-              <motion.div
-                className="hidden md:block"
-                style={{ y: heroY2 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-              >
-                <div className="-translate-y-6">
-                  <MockHabitsScreen />
-                </div>
-              </motion.div>
-
-            </div>
-          </div>
+          {/* Layered phone stack — depth rotation */}
+          <motion.div
+            className="mt-20 flex justify-center"
+            style={{ y: heroY1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+          >
+            <HeroPhoneStack />
+          </motion.div>
         </div>
       </section>
 
