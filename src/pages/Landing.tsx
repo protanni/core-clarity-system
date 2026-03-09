@@ -1,5 +1,6 @@
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   CheckSquare,
   Repeat,
@@ -11,21 +12,19 @@ import {
   Moon,
   Home,
   User,
-  Pencil,
   Plus,
-  ChevronRight,
   Check,
-  Meh,
-  Frown,
-  Heart,
   Eye,
+  Heart,
+  Sparkles,
+  Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /* ─── animation helpers ─── */
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0, 0, 0.2, 1] as const } },
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as const } },
 };
 
 const stagger = {
@@ -35,7 +34,7 @@ const stagger = {
 
 /* ─── Miniature App Mockups ─── */
 
-function MockBottomNav({ active }: { active: string }) {
+function MockBottomNav({ active, dark = false }: { active: string; dark?: boolean }) {
   const items = [
     { label: "Today", icon: Home },
     { label: "Tasks", icon: CheckSquare },
@@ -44,18 +43,32 @@ function MockBottomNav({ active }: { active: string }) {
     { label: "Account", icon: User },
   ];
   return (
-    <div className="flex items-center justify-around h-10 border-t border-border/50 bg-card/80 px-2">
+    <div
+      className={`flex items-center justify-around h-10 border-t px-2 ${
+        dark
+          ? "bg-[hsl(220,16%,11%)] border-[hsl(220,12%,18%)]"
+          : "bg-card/80 border-border/50"
+      }`}
+    >
       {items.map((item) => {
         const Icon = item.icon;
         const isActive = item.label === active;
         return (
           <div key={item.label} className="flex flex-col items-center gap-0.5">
             <Icon
-              className={`w-3.5 h-3.5 ${isActive ? "text-primary" : "text-muted-foreground/50"}`}
+              className={`w-3.5 h-3.5 ${
+                isActive
+                  ? dark ? "text-[hsl(158,32%,52%)]" : "text-primary"
+                  : dark ? "text-[hsl(220,8%,40%)]" : "text-muted-foreground/50"
+              }`}
               strokeWidth={isActive ? 2.5 : 1.5}
             />
             <span
-              className={`text-[7px] font-medium ${isActive ? "text-primary" : "text-muted-foreground/50"}`}
+              className={`text-[7px] font-medium ${
+                isActive
+                  ? dark ? "text-[hsl(158,32%,52%)]" : "text-primary"
+                  : dark ? "text-[hsl(220,8%,40%)]" : "text-muted-foreground/50"
+              }`}
             >
               {item.label}
             </span>
@@ -69,17 +82,19 @@ function MockBottomNav({ active }: { active: string }) {
 function MockTodayScreen({ dark = false }: { dark?: boolean }) {
   return (
     <div
-      className={`rounded-2xl overflow-hidden shadow-card border flex flex-col ${
+      className={`rounded-2xl overflow-hidden border flex flex-col ${
         dark
-          ? "bg-[hsl(220,18%,9%)] border-[hsl(220,12%,20%)] text-[hsl(40,15%,92%)]"
-          : "bg-card border-border/50 text-foreground"
+          ? "bg-[hsl(220,18%,9%)] border-[hsl(220,12%,20%)]"
+          : "bg-card border-border/50 shadow-card"
       }`}
       style={{ width: 220, height: 380 }}
     >
       <div className="flex-1 p-4 space-y-3 overflow-hidden">
         <div className="space-y-0.5">
           <p
-            className={`text-[7px] font-medium uppercase tracking-widest ${dark ? "text-[hsl(158,32%,48%)]/70" : "text-primary/70"}`}
+            className={`text-[7px] font-medium uppercase tracking-widest ${
+              dark ? "text-[hsl(158,32%,48%)]/70" : "text-primary/70"
+            }`}
           >
             Daily Control Layer
           </p>
@@ -96,14 +111,19 @@ function MockTodayScreen({ dark = false }: { dark?: boolean }) {
           className={`rounded-lg p-3 space-y-1.5 ${
             dark
               ? "bg-[hsl(220,16%,13%)] border border-[hsl(220,12%,20%)]/50"
-              : "bg-card border border-border/50 shadow-sm"
+              : "bg-primary/5 border border-primary/10"
           }`}
         >
-          <p
-            className={`text-[7px] font-medium uppercase tracking-wide ${dark ? "text-[hsl(220,8%,55%)]" : "text-muted-foreground"}`}
-          >
-            Daily Focus
-          </p>
+          <div className="flex items-center gap-1">
+            <Sparkles className={`w-2.5 h-2.5 ${dark ? "text-[hsl(158,32%,48%)]" : "text-primary"}`} strokeWidth={1.5} />
+            <p
+              className={`text-[7px] font-medium uppercase tracking-wide ${
+                dark ? "text-[hsl(220,8%,55%)]" : "text-muted-foreground"
+              }`}
+            >
+              Daily Focus
+            </p>
+          </div>
           <p className={`text-[9px] ${dark ? "text-[hsl(40,15%,92%)]" : "text-foreground"}`}>
             Ship landing page v1
           </p>
@@ -148,9 +168,7 @@ function MockTodayScreen({ dark = false }: { dark?: boolean }) {
 
         {/* Mood */}
         <div className="space-y-1">
-          <p
-            className={`text-[8px] font-medium ${dark ? "text-[hsl(40,15%,92%)]" : "text-foreground"}`}
-          >
+          <p className={`text-[8px] font-medium ${dark ? "text-[hsl(40,15%,92%)]" : "text-foreground"}`}>
             How are you feeling?
           </p>
           <div className="flex gap-1">
@@ -163,7 +181,9 @@ function MockTodayScreen({ dark = false }: { dark?: boolean }) {
             ].map((m) => (
               <div
                 key={m.label}
-                className={`flex-1 rounded-md py-1 flex flex-col items-center ${m.selected ? "ring-1 ring-primary" : ""}`}
+                className={`flex-1 rounded-md py-1 flex flex-col items-center ${
+                  m.selected ? "ring-1 ring-primary" : ""
+                }`}
                 style={{ backgroundColor: m.color }}
               >
                 <span className={`text-[6px] font-medium ${dark ? "opacity-80" : "opacity-70"}`}>
@@ -174,7 +194,7 @@ function MockTodayScreen({ dark = false }: { dark?: boolean }) {
           </div>
         </div>
       </div>
-      <MockBottomNav active="Today" />
+      <MockBottomNav active="Today" dark={dark} />
     </div>
   );
 }
@@ -190,28 +210,26 @@ function MockTasksScreen() {
           <p className="text-sm font-semibold text-foreground">Tasks</p>
           <p className="text-[8px] text-muted-foreground">4 open · 2 completed</p>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap">
           {["All", "Work", "Personal", "Mind"].map((a, i) => (
             <div
               key={a}
               className={`px-2 py-0.5 rounded-full text-[7px] font-medium ${
-                i === 0
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground"
+                i === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
               }`}
             >
               {a}
             </div>
           ))}
         </div>
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           {["Prepare weekly report", "Book dentist appointment", "Read 20 pages", "Reply to emails"].map(
-            (t, i) => (
+            (t) => (
               <div
                 key={t}
-                className="flex items-center gap-1.5 py-1 border-b border-border/30 last:border-0"
+                className="flex items-center gap-1.5 py-1.5 border-b border-border/30 last:border-0"
               >
-                <div className="w-2.5 h-2.5 rounded-sm border border-border" />
+                <div className="w-2.5 h-2.5 rounded-sm border border-border flex-shrink-0" />
                 <span className="text-[8px] text-foreground">{t}</span>
               </div>
             )
@@ -235,9 +253,9 @@ function MockHabitsScreen() {
           <p className="text-[8px] text-muted-foreground">2 of 4 completed today</p>
         </div>
         {["Meditate 10 min", "Exercise", "Read", "Journal"].map((h, i) => (
-          <div key={h} className="flex items-center gap-2 py-1 border-b border-border/30 last:border-0">
+          <div key={h} className="flex items-center gap-2 py-1.5 border-b border-border/30 last:border-0">
             <div
-              className={`w-3 h-3 rounded-full border-2 flex items-center justify-center ${
+              className={`w-3 h-3 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                 i < 2 ? "bg-primary border-primary" : "border-border"
               }`}
             >
@@ -250,9 +268,7 @@ function MockHabitsScreen() {
               {Array.from({ length: 7 }).map((_, d) => (
                 <div
                   key={d}
-                  className={`w-1 h-1 rounded-full ${
-                    d < (i < 2 ? 5 : 3) ? "bg-primary/60" : "bg-border"
-                  }`}
+                  className={`w-1 h-1 rounded-full ${d < (i < 2 ? 5 : 3) ? "bg-primary/60" : "bg-border"}`}
                 />
               ))}
             </div>
@@ -275,11 +291,8 @@ function MockReviewScreen() {
           <p className="text-sm font-semibold text-foreground">Weekly Review</p>
           <p className="text-[8px] text-muted-foreground">Reflect, realign, prepare.</p>
         </div>
-        {/* Consistency */}
         <div className="rounded-lg p-2.5 bg-muted/50 border border-border/30 space-y-1">
-          <p className="text-[7px] font-medium text-muted-foreground uppercase tracking-wide">
-            Consistency
-          </p>
+          <p className="text-[7px] font-medium text-muted-foreground uppercase tracking-wide">Consistency</p>
           <p className="text-[8px] text-foreground">
             Showed up <span className="text-primary font-medium">5</span> of 7 days
           </p>
@@ -287,7 +300,6 @@ function MockReviewScreen() {
             Habits: <span className="text-primary font-medium">18</span> completions
           </p>
         </div>
-        {/* Emotional */}
         <div className="rounded-lg p-2.5 bg-muted/50 border border-border/30 space-y-1">
           <p className="text-[7px] font-medium text-muted-foreground uppercase tracking-wide">
             Emotional Summary
@@ -296,14 +308,11 @@ function MockReviewScreen() {
             Mostly: <span className="text-primary font-medium">Good</span>
           </p>
         </div>
-        {/* Reflection */}
         <div className="rounded-lg p-2.5 bg-muted/50 border border-border/30 space-y-1">
           <p className="text-[7px] font-medium text-muted-foreground uppercase tracking-wide">
             Reflection
           </p>
-          <p className="text-[8px] text-muted-foreground italic">
-            "Felt more focused this week…"
-          </p>
+          <p className="text-[8px] text-muted-foreground italic">"Felt more focused this week…"</p>
         </div>
       </div>
       <MockBottomNav active="Review" />
@@ -315,10 +324,28 @@ function MockReviewScreen() {
 export default function LandingPage() {
   const navigate = useNavigate();
 
+  /* Scroll-linked parallax for hero mockups */
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroY1 = useTransform(heroProgress, [0, 1], [0, -20]); // center
+  const heroY2 = useTransform(heroProgress, [0, 1], [0, -12]); // sides
+
+  /* Scroll-linked horizontal drift for product preview */
+  const previewRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: previewProgress } = useScroll({
+    target: previewRef,
+    offset: ["start end", "end start"],
+  });
+  const previewX = useTransform(previewProgress, [0, 1], [24, -24]);
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+
       {/* ─── NAV ─── */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40">
+      <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border/40">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <span className="text-sm font-semibold tracking-tight text-foreground">PROTANNI</span>
           <div className="flex items-center gap-3">
@@ -333,14 +360,15 @@ export default function LandingPage() {
       </nav>
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden">
-        <div className="max-w-5xl mx-auto px-6 pt-20 pb-16 md:pt-32 md:pb-24">
+      <section ref={heroRef} className="relative overflow-hidden">
+        <div className="max-w-5xl mx-auto px-6 pt-24 pb-20 md:pt-40 md:pb-32">
+
+          {/* Text block */}
           <motion.div
-            className="max-w-2xl mx-auto text-center space-y-6"
+            className="max-w-xl mx-auto text-center space-y-6"
             variants={stagger}
             initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
+            animate="show"
           >
             <motion.p
               variants={fadeUp}
@@ -350,7 +378,7 @@ export default function LandingPage() {
             </motion.p>
             <motion.h1
               variants={fadeUp}
-              className="text-3xl md:text-5xl font-semibold tracking-tight text-foreground leading-tight"
+              className="text-4xl md:text-5xl font-semibold tracking-tight text-foreground leading-[1.15]"
             >
               Your life.
               <br />
@@ -358,54 +386,79 @@ export default function LandingPage() {
             </motion.h1>
             <motion.p
               variants={fadeUp}
-              className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-lg mx-auto"
+              className="text-base md:text-lg text-muted-foreground leading-relaxed"
             >
-              Protanni is a personal operating system designed to help you manage tasks, track habits,
-              and reflect with intention.
+              Protanni is a personal operating system for tasks, habits and reflection.
             </motion.p>
             <motion.div variants={fadeUp} className="flex items-center justify-center gap-3 pt-2">
               <Button size="lg" onClick={() => navigate("/login")}>
                 Start free
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
-              <Button variant="outline" size="lg" onClick={() => {
-                document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
-              }}>
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() =>
+                  document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })
+                }
+              >
                 See how it works
               </Button>
             </motion.div>
           </motion.div>
 
-          {/* Hero device mockup */}
-          <motion.div
-            className="mt-16 flex justify-center"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <div className="flex items-end gap-4 md:gap-6">
-              <div className="hidden md:block opacity-60 -translate-y-4">
-                <MockTasksScreen />
-              </div>
-              <div className="relative">
+          {/* Mockup trio with parallax */}
+          <div className="mt-20 flex justify-center">
+            <div className="flex items-end gap-5 md:gap-8">
+
+              {/* Left */}
+              <motion.div
+                className="hidden md:block"
+                style={{ y: heroY2 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
+                <div className="-translate-y-6">
+                  <MockTasksScreen />
+                </div>
+              </motion.div>
+
+              {/* Center – Today (featured) */}
+              <motion.div
+                style={{ y: heroY1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="relative"
+              >
                 <MockTodayScreen />
-                {/* Glow */}
-                <div className="absolute -inset-8 bg-primary/5 rounded-3xl blur-2xl -z-10" />
-              </div>
-              <div className="hidden md:block opacity-60 -translate-y-4">
-                <MockHabitsScreen />
-              </div>
+                <div className="absolute -inset-8 bg-primary/6 rounded-3xl blur-3xl -z-10" />
+              </motion.div>
+
+              {/* Right */}
+              <motion.div
+                className="hidden md:block"
+                style={{ y: heroY2 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.5 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+              >
+                <div className="-translate-y-6">
+                  <MockHabitsScreen />
+                </div>
+              </motion.div>
+
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ─── PRODUCT PREVIEW ─── */}
-      <section className="py-20 md:py-28 bg-muted/30">
+      <section className="py-24 md:py-32 bg-muted/30" ref={previewRef}>
         <div className="max-w-5xl mx-auto px-6">
           <motion.div
-            className="text-center mb-14 space-y-3"
+            className="text-center mb-16 space-y-3"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -423,54 +476,47 @@ export default function LandingPage() {
             >
               Everything you need, nothing you don't
             </motion.h2>
+            <motion.p variants={fadeUp} className="text-sm text-muted-foreground max-w-md mx-auto">
+              Tasks, habits, reflection and review — connected in one simple system.
+            </motion.p>
           </motion.div>
 
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 justify-items-center"
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-          >
-            {[
-              { label: "Today", comp: <MockTodayScreen /> },
-              { label: "Tasks", comp: <MockTasksScreen /> },
-              { label: "Habits", comp: <MockHabitsScreen /> },
-              { label: "Review", comp: <MockReviewScreen /> },
-            ].map((screen) => (
-              <motion.div key={screen.label} variants={fadeUp} className="space-y-3 flex flex-col items-center">
-                <div className="transform scale-[0.85] md:scale-100 origin-top">{screen.comp}</div>
-                <p className="text-xs font-medium text-muted-foreground">{screen.label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Light + Dark side-by-side */}
-          <motion.div
-            className="mt-16 flex flex-col items-center gap-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="text-xs text-muted-foreground">Light & Dark themes included</p>
-            <div className="flex items-center gap-4">
-              <div className="transform scale-75 origin-center">
-                <MockTodayScreen />
-              </div>
-              <div className="transform scale-75 origin-center">
-                <MockTodayScreen dark />
-              </div>
-            </div>
-          </motion.div>
+          {/* Horizontal drift wrapper */}
+          <div className="overflow-hidden">
+            <motion.div
+              style={{ x: previewX }}
+              className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 justify-items-center"
+            >
+              {[
+                { label: "Today", comp: <MockTodayScreen />, delay: 0 },
+                { label: "Tasks", comp: <MockTasksScreen />, delay: 0.07 },
+                { label: "Habits", comp: <MockHabitsScreen />, delay: 0.14 },
+                { label: "Review", comp: <MockReviewScreen />, delay: 0.21 },
+              ].map((screen) => (
+                <motion.div
+                  key={screen.label}
+                  className="space-y-3 flex flex-col items-center"
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.55, delay: screen.delay, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                  <div className="transform scale-[0.82] md:scale-100 origin-top">
+                    {screen.comp}
+                  </div>
+                  <p className="text-xs font-medium text-muted-foreground">{screen.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
         </div>
       </section>
 
       {/* ─── HOW IT WORKS ─── */}
-      <section id="how-it-works" className="py-20 md:py-28">
+      <section id="how-it-works" className="py-24 md:py-32">
         <div className="max-w-3xl mx-auto px-6">
           <motion.div
-            className="text-center mb-14 space-y-3"
+            className="text-center mb-16 space-y-3"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -491,7 +537,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div
-            className="grid md:grid-cols-3 gap-8 md:gap-12"
+            className="grid md:grid-cols-3 gap-10 md:gap-12"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -502,35 +548,114 @@ export default function LandingPage() {
                 step: "01",
                 title: "Capture",
                 description:
-                  "Add tasks, set habits, and define what matters. Your system holds everything so your mind doesn't have to.",
+                  "Capture tasks, habits and priorities so everything that matters lives in one place.",
                 icon: Plus,
               },
               {
                 step: "02",
                 title: "Act",
-                description:
-                  "Focus on today. Bring tasks to your daily view, check off habits, and track your emotional state.",
+                description: "Focus on what matters today and move tasks into action.",
                 icon: CheckSquare,
               },
               {
                 step: "03",
                 title: "Reflect",
                 description:
-                  "Review your week. See patterns, acknowledge progress, and set intentions for what's next.",
+                  "Review your week and understand patterns in your work and life.",
                 icon: Eye,
               },
             ].map((s) => {
               const Icon = s.icon;
               return (
-                <motion.div key={s.step} variants={fadeUp} className="text-center md:text-left space-y-3">
+                <motion.div
+                  key={s.step}
+                  variants={fadeUp}
+                  className="text-center md:text-left space-y-4"
+                >
                   <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/10">
-                    <Icon className="w-4 h-4 text-primary" />
+                    <Icon className="w-4 h-4 text-primary" strokeWidth={1.75} />
                   </div>
-                  <p className="text-[10px] font-medium text-primary/70 uppercase tracking-widest">
-                    Step {s.step}
-                  </p>
-                  <h3 className="text-lg font-semibold text-foreground">{s.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-medium text-primary/55 uppercase tracking-widest">
+                      Step {s.step}
+                    </p>
+                    <h3 className="text-lg font-semibold text-foreground">{s.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ─── AI ASSISTANCE ─── */}
+      <section className="py-24 md:py-32 bg-muted/30">
+        <div className="max-w-3xl mx-auto px-6">
+          <motion.div
+            className="text-center mb-14 space-y-4"
+            variants={stagger}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+          >
+            <motion.div variants={fadeUp} className="flex items-center justify-center gap-2">
+              <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-primary" strokeWidth={1.75} />
+              </div>
+              <p className="text-[10px] font-medium text-primary uppercase tracking-[0.2em]">
+                AI Assistance
+              </p>
+            </motion.div>
+            <motion.h2
+              variants={fadeUp}
+              className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight"
+            >
+              Thoughtful assistance,
+              <br className="hidden md:block" /> when you need it
+            </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              className="text-sm text-muted-foreground leading-relaxed max-w-lg mx-auto"
+            >
+              Protanni can use your own data — tasks, habits, mood and history — to help you decide what
+              matters most today. Generate a personalized Daily Focus based on your current context so you
+              always know where to start.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="grid sm:grid-cols-2 gap-5"
+            variants={stagger}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true }}
+          >
+            {[
+              {
+                icon: Sparkles,
+                title: "Daily Focus",
+                desc: "Create a personalized daily focus using your tasks, habits and recent activity.",
+              },
+              {
+                icon: Wand2,
+                title: "Smart task breakdown",
+                desc: "Turn overwhelming tasks into clear next steps. Protanni can break complex tasks into smaller, actionable subtasks so you can start moving forward immediately.",
+              },
+            ].map((f) => {
+              const Icon = f.icon;
+              return (
+                <motion.div
+                  key={f.title}
+                  variants={fadeUp}
+                  whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                  className="bg-card rounded-xl p-6 border border-border/50 shadow-card space-y-3 cursor-default"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Icon className="w-4 h-4 text-primary" strokeWidth={1.75} />
+                  </div>
+                  <h3 className="text-sm font-semibold text-foreground">{f.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
                 </motion.div>
               );
             })}
@@ -539,10 +664,10 @@ export default function LandingPage() {
       </section>
 
       {/* ─── CORE FEATURES ─── */}
-      <section className="py-20 md:py-28 bg-muted/30">
+      <section className="py-24 md:py-32">
         <div className="max-w-4xl mx-auto px-6">
           <motion.div
-            className="text-center mb-14 space-y-3"
+            className="text-center mb-16 space-y-3"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -563,7 +688,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div
-            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -596,9 +721,9 @@ export default function LandingPage() {
                 desc: "Reflect on consistency, mood patterns, and intentions. Close the week with clarity.",
               },
               {
-                icon: Heart,
+                icon: Sparkles,
                 title: "Daily Focus",
-                desc: "One intention per day. A grounding anchor for everything else.",
+                desc: "One intention per day, informed by your habits, tasks, and recent activity.",
               },
             ].map((f) => {
               const Icon = f.icon;
@@ -606,10 +731,11 @@ export default function LandingPage() {
                 <motion.div
                   key={f.title}
                   variants={fadeUp}
-                  className="bg-card rounded-xl p-6 shadow-card border border-border/50 space-y-3"
+                  whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                  className="bg-card rounded-xl p-6 shadow-card border border-border/50 space-y-3 cursor-default"
                 >
                   <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon className="w-4 h-4 text-primary" />
+                    <Icon className="w-4 h-4 text-primary" strokeWidth={1.75} />
                   </div>
                   <h3 className="text-sm font-semibold text-foreground">{f.title}</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
@@ -621,30 +747,28 @@ export default function LandingPage() {
       </section>
 
       {/* ─── LIGHT & DARK MODE ─── */}
-      <section className="py-20 md:py-28">
+      <section className="py-24 md:py-32 bg-muted/30">
         <div className="max-w-3xl mx-auto px-6">
           <motion.div
-            className="text-center space-y-4"
+            className="text-center space-y-4 mb-14"
             variants={stagger}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
           >
-            <motion.div variants={fadeUp} className="flex items-center justify-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                <Sun className="w-4 h-4 text-foreground" />
+            <motion.div variants={fadeUp} className="flex items-center justify-center gap-2.5">
+              <div className="w-7 h-7 rounded-full bg-background border border-border/60 flex items-center justify-center shadow-sm">
+                <Sun className="w-3.5 h-3.5 text-foreground" />
               </div>
-              <div className="w-8 h-8 rounded-full bg-[hsl(220,18%,9%)] flex items-center justify-center">
-                <Moon className="w-4 h-4 text-[hsl(40,15%,92%)]" />
+              <div className="w-7 h-7 rounded-full bg-[hsl(220,18%,9%)] flex items-center justify-center shadow-sm">
+                <Moon className="w-3.5 h-3.5 text-[hsl(40,15%,70%)]" />
               </div>
             </motion.div>
             <motion.h2
               variants={fadeUp}
               className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight"
             >
-              Designed for your rhythm,
-              <br />
-              day and night
+              Designed for day and night
             </motion.h2>
             <motion.p
               variants={fadeUp}
@@ -655,59 +779,69 @@ export default function LandingPage() {
             </motion.p>
           </motion.div>
 
+          {/* Light dominant, dark secondary */}
           <motion.div
-            className="mt-12 flex justify-center items-center gap-6"
-            initial={{ opacity: 0, y: 20 }}
+            className="flex justify-center items-end gap-8 md:gap-14"
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ duration: 0.6 }}
           >
-            <div className="relative">
+            {/* Light – primary */}
+            <div className="flex flex-col items-center gap-3">
               <MockTodayScreen />
-              <p className="text-center text-[10px] text-muted-foreground mt-3 font-medium">Light</p>
+              <div className="flex items-center gap-1.5">
+                <Sun className="w-3 h-3 text-muted-foreground" />
+                <p className="text-[10px] font-medium text-muted-foreground">Light — default</p>
+              </div>
             </div>
-            <div className="relative">
-              <MockTodayScreen dark />
-              <p className="text-center text-[10px] text-muted-foreground mt-3 font-medium">Dark</p>
+
+            {/* Dark – secondary */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="transform scale-[0.78] origin-bottom opacity-70">
+                <MockTodayScreen dark />
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Moon className="w-3 h-3 text-muted-foreground" />
+                <p className="text-[10px] font-medium text-muted-foreground">Dark — also available</p>
+              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* ─── PHILOSOPHY ─── */}
-      <section className="py-20 md:py-28 bg-muted/30">
-        <div className="max-w-2xl mx-auto px-6">
+      <section className="py-24 md:py-32">
+        <div className="max-w-xl mx-auto px-6">
           <motion.div
-            className="text-center space-y-6"
+            className="text-center space-y-8"
             variants={stagger}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true }}
           >
-            <motion.p
-              variants={fadeUp}
-              className="text-[10px] font-medium text-primary uppercase tracking-[0.2em]"
-            >
-              Philosophy
-            </motion.p>
-            <motion.h2
-              variants={fadeUp}
-              className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight"
-            >
-              Clarity, not pressure
-            </motion.h2>
-            <motion.div variants={fadeUp} className="space-y-4">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Protanni isn't about squeezing more out of every day. It's about seeing your life clearly —
-                what you're doing, how you're feeling, and where your attention goes.
+            <motion.div variants={fadeUp} className="space-y-3">
+              <p className="text-[10px] font-medium text-primary uppercase tracking-[0.2em]">
+                Philosophy
               </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
+              <h2 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+                Clarity, not pressure
+              </h2>
+            </motion.div>
+
+            <motion.div variants={fadeUp} className="space-y-5">
+              <p className="text-sm text-muted-foreground leading-[1.9]">
+                Protanni isn't about squeezing more out of every day. It's about seeing your life clearly
+                — what you're doing, how you're feeling, and where your attention goes.
+              </p>
+              <p className="text-sm text-muted-foreground leading-[1.9]">
                 There are no streaks to protect, no gamification to chase, no dashboards designed to make
                 you feel behind. Just a calm system that helps you stay aware, consistent, and intentional.
               </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Because the goal isn't to optimize your life.
-                <br />
+              <p className="text-sm leading-[1.9]">
+                <span className="text-muted-foreground">
+                  Because the goal isn't to optimize your life.{" "}
+                </span>
                 <span className="text-foreground font-medium">It's to understand it.</span>
               </p>
             </motion.div>
@@ -716,7 +850,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="py-20 md:py-28">
+      <section className="py-24 md:py-32 bg-muted/30">
         <div className="max-w-3xl mx-auto px-6">
           <motion.div
             className="text-center mb-14 space-y-3"
@@ -735,12 +869,15 @@ export default function LandingPage() {
               variants={fadeUp}
               className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight"
             >
-              Simple, honest plans
+              Choose your plan
             </motion.h2>
+            <motion.p variants={fadeUp} className="text-sm text-muted-foreground">
+              Simple, honest plans.
+            </motion.p>
           </motion.div>
 
           <motion.div
-            className="grid md:grid-cols-2 gap-6 max-w-xl mx-auto"
+            className="grid md:grid-cols-2 gap-5 max-w-xl mx-auto"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -749,58 +886,62 @@ export default function LandingPage() {
             {/* Free */}
             <motion.div
               variants={fadeUp}
-              className="bg-card rounded-xl p-6 shadow-card border border-border/50 space-y-4"
+              className="bg-card rounded-xl p-7 shadow-card border border-border/50 space-y-5 flex flex-col"
             >
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Free</h3>
                 <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-2xl font-semibold text-foreground">$0</span>
+                  <span className="text-3xl font-semibold text-foreground">$0</span>
                   <span className="text-xs text-muted-foreground">/month</span>
                 </div>
               </div>
-              <ul className="space-y-2">
+              <ul className="space-y-2.5 flex-1">
                 {["Up to 20 tasks", "3 habits", "Daily mood check-in", "Basic weekly review"].map((f) => (
-                  <li key={f} className="flex items-center gap-2">
+                  <li key={f} className="flex items-center gap-2.5">
                     <Check className="w-3 h-3 text-primary flex-shrink-0" />
                     <span className="text-xs text-muted-foreground">{f}</span>
                   </li>
                 ))}
               </ul>
-              <Button variant="outline" className="w-full text-xs" onClick={() => navigate("/login")}>
-                Get started
+              <Button
+                variant="outline"
+                className="w-full text-xs h-10"
+                onClick={() => navigate("/login")}
+              >
+                Get started free
               </Button>
             </motion.div>
 
             {/* Pro */}
             <motion.div
               variants={fadeUp}
-              className="bg-card rounded-xl p-6 shadow-card border-2 border-primary/30 space-y-4 relative"
+              className="bg-card rounded-xl p-7 shadow-card border-2 border-primary/25 space-y-5 relative flex flex-col"
             >
-              <div className="absolute -top-2.5 left-6 px-2.5 py-0.5 bg-primary text-primary-foreground text-[9px] font-medium rounded-full">
+              <div className="absolute -top-3 left-6 px-3 py-1 bg-primary text-primary-foreground text-[9px] font-medium rounded-full">
                 Recommended
               </div>
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Pro</h3>
                 <div className="mt-2 flex items-baseline gap-1">
-                  <span className="text-2xl font-semibold text-foreground">$7</span>
+                  <span className="text-3xl font-semibold text-foreground">$7</span>
                   <span className="text-xs text-muted-foreground">/month</span>
                 </div>
               </div>
-              <ul className="space-y-2">
+              <ul className="space-y-2.5 flex-1">
                 {[
                   "Unlimited tasks & habits",
                   "Full life area organization",
                   "Review archive & history",
+                  "AI Daily Focus & task breakdown",
                   "Sync across devices",
-                  "Priority support",
                 ].map((f) => (
-                  <li key={f} className="flex items-center gap-2">
+                  <li key={f} className="flex items-center gap-2.5">
                     <Check className="w-3 h-3 text-primary flex-shrink-0" />
                     <span className="text-xs text-muted-foreground">{f}</span>
                   </li>
                 ))}
               </ul>
-              <Button className="w-full text-xs" onClick={() => navigate("/login")}>
+              <Button className="w-full text-xs h-10" onClick={() => navigate("/login")}>
                 Start free trial
               </Button>
             </motion.div>
@@ -809,10 +950,10 @@ export default function LandingPage() {
       </section>
 
       {/* ─── FINAL CTA ─── */}
-      <section className="py-20 md:py-28 bg-muted/30">
-        <div className="max-w-2xl mx-auto px-6 text-center">
+      <section className="py-24 md:py-32">
+        <div className="max-w-xl mx-auto px-6 text-center">
           <motion.div
-            className="space-y-6"
+            className="space-y-7"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -820,18 +961,17 @@ export default function LandingPage() {
           >
             <motion.h2
               variants={fadeUp}
-              className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight"
+              className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight leading-tight"
             >
-              Start building your life system.
+              Start building
+              <br />
+              your life system.
             </motion.h2>
-            <motion.p
-              variants={fadeUp}
-              className="text-sm text-muted-foreground"
-            >
+            <motion.p variants={fadeUp} className="text-sm text-muted-foreground">
               Free to start. No credit card required.
             </motion.p>
             <motion.div variants={fadeUp}>
-              <Button size="lg" onClick={() => navigate("/login")}>
+              <Button size="lg" className="px-8" onClick={() => navigate("/login")}>
                 Start free
                 <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
@@ -849,6 +989,7 @@ export default function LandingPage() {
           </p>
         </div>
       </footer>
+
     </div>
   );
 }
