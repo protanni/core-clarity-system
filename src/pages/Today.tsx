@@ -5,11 +5,13 @@ import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useTodayTasks } from "@/hooks/useTodayTasks";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { Task, Habit, MoodEntry, DailyFocus, MoodLevel } from "@/types";
 import { MoodCard } from "@/components/mood/MoodCard";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { HabitItem } from "@/components/habits/HabitItem";
 import { OfflineBanner } from "@/components/shared/OfflineBanner";
+import { HintCard } from "@/components/shared/HintCard";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
@@ -56,6 +58,11 @@ export default function TodayPage() {
   const [focusInput, setFocusInput] = useState("");
 
   const isOnline = useOnlineStatus();
+  const { activeHint, dismiss, skipAll } = useOnboarding([
+    "onboarding_today_focus",
+    "onboarding_today_tasks",
+    "onboarding_today_mood",
+  ]);
 
   const showOfflineToast = () => {
     toast({
@@ -243,6 +250,16 @@ export default function TodayPage() {
           )}
         </motion.section>
 
+        {activeHint === "onboarding_today_focus" && (
+          <HintCard
+            visible
+            title="Daily Focus"
+            description="A gentle direction for your day based on your tasks and habits."
+            onDismiss={() => dismiss("onboarding_today_focus")}
+            onSkipAll={skipAll}
+          />
+        )}
+
         {/* Today's Tasks */}
         <motion.section variants={item} className="space-y-3">
           <div className="flex items-center justify-between">
@@ -297,6 +314,16 @@ export default function TodayPage() {
           )}
         </motion.section>
 
+        {activeHint === "onboarding_today_tasks" && (
+          <HintCard
+            visible
+            title="Today Tasks"
+            description="These are the tasks you chose to focus on today."
+            onDismiss={() => dismiss("onboarding_today_tasks")}
+            onSkipAll={skipAll}
+          />
+        )}
+
         {/* Habits for Today */}
         <motion.section variants={item} className="space-y-3">
           <div className="flex items-center justify-between">
@@ -343,6 +370,15 @@ export default function TodayPage() {
         </motion.section>
 
         {/* Mood Check-in */}
+        {activeHint === "onboarding_today_mood" && (
+          <HintCard
+            visible
+            title="Mood"
+            description="Track how you feel to understand your energy patterns."
+            onDismiss={() => dismiss("onboarding_today_mood")}
+            onSkipAll={skipAll}
+          />
+        )}
         <motion.section variants={item} className="space-y-3">
           <div className="space-y-1">
             <h2 className="text-sm font-medium text-foreground">

@@ -2,9 +2,11 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { Habit, LifeArea } from "@/types";
 import { HabitItem } from "@/components/habits/HabitItem";
 import { AreaTabs } from "@/components/shared/AreaTabs";
+import { HintCard } from "@/components/shared/HintCard";
 import { Input } from "@/components/ui/input";
 
 const container = {
@@ -28,6 +30,10 @@ export default function HabitsPage() {
   const [habits, setHabits] = useLocalStorage<Habit[]>("protanni-habits", []);
   const [newHabitName, setNewHabitName] = useState("");
   const [selectedArea, setSelectedArea] = useState<LifeArea>("all");
+  const { activeHint, dismiss, skipAll } = useOnboarding([
+    "onboarding_habits_consistency",
+    "onboarding_habits_progress",
+  ]);
 
   const today = getTodayISO();
 
@@ -97,6 +103,25 @@ export default function HabitsPage() {
           {totalCompletedToday} of {habits.length} completed today
         </p>
       </motion.header>
+
+      {activeHint === "onboarding_habits_consistency" && (
+        <HintCard
+          visible
+          title="Consistency matters"
+          description="Build habits through small daily actions."
+          onDismiss={() => dismiss("onboarding_habits_consistency")}
+          onSkipAll={skipAll}
+        />
+      )}
+      {activeHint === "onboarding_habits_progress" && (
+        <HintCard
+          visible
+          title="Progress tracking"
+          description="Your weekly dots show how consistent you are."
+          onDismiss={() => dismiss("onboarding_habits_progress")}
+          onSkipAll={skipAll}
+        />
+      )}
 
       {/* Area Tabs */}
       <motion.div

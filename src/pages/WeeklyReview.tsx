@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Archive, Check } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { WeeklyReflection } from "@/types";
 import { useWeeklyStats } from "@/hooks/useWeeklyStats";
 import { getWeekDates, getWeekStartISO } from "@/lib/weekUtils";
 import { Button } from "@/components/ui/button";
+import { HintCard } from "@/components/shared/HintCard";
 import { ConsistencyCard } from "@/components/weekly/ConsistencyCard";
 import { LifeAreasCard } from "@/components/weekly/LifeAreasCard";
 import { EmotionalSummaryCard } from "@/components/weekly/EmotionalSummaryCard";
@@ -33,6 +35,10 @@ export default function WeeklyReviewPage() {
 
   const [isSaved, setIsSaved] = useState(false);
   const [isEditing, setIsEditing] = useState(true);
+  const { activeHint, dismiss, skipAll } = useOnboarding([
+    "onboarding_review_weekly",
+    "onboarding_review_areas",
+  ]);
 
   const weekDates = useMemo(() => getWeekDates(), []);
   const weekStart = getWeekStartISO();
@@ -106,6 +112,25 @@ export default function WeeklyReviewPage() {
           Reflect, realign, and prepare for the next week.
         </p>
       </motion.header>
+
+      {activeHint === "onboarding_review_weekly" && (
+        <HintCard
+          visible
+          title="Weekly review"
+          description="Reflect on your progress and emotional patterns."
+          onDismiss={() => dismiss("onboarding_review_weekly")}
+          onSkipAll={skipAll}
+        />
+      )}
+      {activeHint === "onboarding_review_areas" && (
+        <HintCard
+          visible
+          title="Life overview"
+          description="See which areas of your life received attention."
+          onDismiss={() => dismiss("onboarding_review_areas")}
+          onSkipAll={skipAll}
+        />
+      )}
 
       {/* Cards */}
       <motion.div variants={item}>

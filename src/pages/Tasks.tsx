@@ -3,9 +3,11 @@ import { motion } from "framer-motion";
 import { Plus, ArrowUpRight } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useTodayTasks } from "@/hooks/useTodayTasks";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { Task, LifeArea } from "@/types";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { AreaTabs } from "@/components/shared/AreaTabs";
+import { HintCard } from "@/components/shared/HintCard";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
@@ -27,6 +29,10 @@ export default function TasksPage() {
   const [newTaskText, setNewTaskText] = useState("");
   const [selectedArea, setSelectedArea] = useState<LifeArea>("all");
   const { addToToday, isInToday } = useTodayTasks();
+  const { activeHint, dismiss, skipAll } = useOnboarding([
+    "onboarding_tasks_breakdown",
+    "onboarding_tasks_smart",
+  ]);
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,6 +97,25 @@ export default function TasksPage() {
           {totalIncomplete} open · {totalCompleted} completed
         </p>
       </motion.header>
+
+      {activeHint === "onboarding_tasks_breakdown" && (
+        <HintCard
+          visible
+          title="Break tasks down"
+          description="Use subtasks to turn complexity into clear action."
+          onDismiss={() => dismiss("onboarding_tasks_breakdown")}
+          onSkipAll={skipAll}
+        />
+      )}
+      {activeHint === "onboarding_tasks_smart" && (
+        <HintCard
+          visible
+          title="Smart subtasks"
+          description="Use the sparkle icon to generate steps automatically."
+          onDismiss={() => dismiss("onboarding_tasks_smart")}
+          onSkipAll={skipAll}
+        />
+      )}
 
       {/* Area Tabs */}
       <motion.div
