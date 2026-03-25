@@ -98,6 +98,25 @@ export default function TasksPage() {
         </p>
       </motion.header>
 
+      {activeHint === "onboarding_tasks_breakdown" && (
+        <HintCard
+          visible
+          title="Break tasks down"
+          description="Use subtasks to turn complexity into clear action."
+          onDismiss={() => dismiss("onboarding_tasks_breakdown")}
+          onSkipAll={skipAll}
+        />
+      )}
+      {activeHint === "onboarding_tasks_smart" && (
+        <HintCard
+          visible
+          title="Smart subtasks"
+          description="Use the sparkle icon to generate steps automatically."
+          onDismiss={() => dismiss("onboarding_tasks_smart")}
+          onSkipAll={skipAll}
+        />
+      )}
+
       {/* Area Tabs */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}

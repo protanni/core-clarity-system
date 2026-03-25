@@ -104,6 +104,25 @@ export default function HabitsPage() {
         </p>
       </motion.header>
 
+      {activeHint === "onboarding_habits_consistency" && (
+        <HintCard
+          visible
+          title="Consistency matters"
+          description="Build habits through small daily actions."
+          onDismiss={() => dismiss("onboarding_habits_consistency")}
+          onSkipAll={skipAll}
+        />
+      )}
+      {activeHint === "onboarding_habits_progress" && (
+        <HintCard
+          visible
+          title="Progress tracking"
+          description="Your weekly dots show how consistent you are."
+          onDismiss={() => dismiss("onboarding_habits_progress")}
+          onSkipAll={skipAll}
+        />
+      )}
+
       {/* Area Tabs */}
       <motion.div
         initial={{ opacity: 0, y: 8 }}

@@ -113,6 +113,25 @@ export default function WeeklyReviewPage() {
         </p>
       </motion.header>
 
+      {activeHint === "onboarding_review_weekly" && (
+        <HintCard
+          visible
+          title="Weekly review"
+          description="Reflect on your progress and emotional patterns."
+          onDismiss={() => dismiss("onboarding_review_weekly")}
+          onSkipAll={skipAll}
+        />
+      )}
+      {activeHint === "onboarding_review_areas" && (
+        <HintCard
+          visible
+          title="Life overview"
+          description="See which areas of your life received attention."
+          onDismiss={() => dismiss("onboarding_review_areas")}
+          onSkipAll={skipAll}
+        />
+      )}
+
       {/* Cards */}
       <motion.div variants={item}>
         <ConsistencyCard

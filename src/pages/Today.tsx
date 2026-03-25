@@ -370,6 +370,15 @@ export default function TodayPage() {
         </motion.section>
 
         {/* Mood Check-in */}
+        {activeHint === "onboarding_today_mood" && (
+          <HintCard
+            visible
+            title="Mood"
+            description="Track how you feel to understand your energy patterns."
+            onDismiss={() => dismiss("onboarding_today_mood")}
+            onSkipAll={skipAll}
+          />
+        )}
         <motion.section variants={item} className="space-y-3">
           <div className="space-y-1">
             <h2 className="text-sm font-medium text-foreground">
