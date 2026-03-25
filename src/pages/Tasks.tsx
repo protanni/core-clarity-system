@@ -3,9 +3,11 @@ import { motion } from "framer-motion";
 import { Plus, ArrowUpRight } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useTodayTasks } from "@/hooks/useTodayTasks";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { Task, LifeArea } from "@/types";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { AreaTabs } from "@/components/shared/AreaTabs";
+import { HintCard } from "@/components/shared/HintCard";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
