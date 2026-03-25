@@ -314,6 +314,16 @@ export default function TodayPage() {
           )}
         </motion.section>
 
+        {activeHint === "onboarding_today_tasks" && (
+          <HintCard
+            visible
+            title="Today Tasks"
+            description="These are the tasks you chose to focus on today."
+            onDismiss={() => dismiss("onboarding_today_tasks")}
+            onSkipAll={skipAll}
+          />
+        )}
+
         {/* Habits for Today */}
         <motion.section variants={item} className="space-y-3">
           <div className="flex items-center justify-between">
