@@ -30,6 +30,10 @@ export default function HabitsPage() {
   const [habits, setHabits] = useLocalStorage<Habit[]>("protanni-habits", []);
   const [newHabitName, setNewHabitName] = useState("");
   const [selectedArea, setSelectedArea] = useState<LifeArea>("all");
+  const { activeHint, dismiss, skipAll } = useOnboarding([
+    "onboarding_habits_consistency",
+    "onboarding_habits_progress",
+  ]);
 
   const today = getTodayISO();
 
