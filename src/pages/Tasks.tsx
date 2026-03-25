@@ -29,6 +29,10 @@ export default function TasksPage() {
   const [newTaskText, setNewTaskText] = useState("");
   const [selectedArea, setSelectedArea] = useState<LifeArea>("all");
   const { addToToday, isInToday } = useTodayTasks();
+  const { activeHint, dismiss, skipAll } = useOnboarding([
+    "onboarding_tasks_breakdown",
+    "onboarding_tasks_smart",
+  ]);
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
