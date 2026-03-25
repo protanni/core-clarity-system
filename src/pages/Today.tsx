@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Plus, Pencil, Info } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -11,7 +11,7 @@ import { MoodCard } from "@/components/mood/MoodCard";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { HabitItem } from "@/components/habits/HabitItem";
 import { OfflineBanner } from "@/components/shared/OfflineBanner";
-import { HintCard } from "@/components/shared/HintCard";
+import { Coachmark } from "@/components/shared/Coachmark";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
@@ -64,6 +64,11 @@ export default function TodayPage() {
     "onboarding_today_mood",
   ]);
 
+  // Anchor refs for coachmarks
+  const focusRef = useRef<HTMLDivElement>(null);
+  const tasksRef = useRef<HTMLDivElement>(null);
+  const moodRef = useRef<HTMLDivElement>(null);
+
   const showOfflineToast = () => {
     toast({
       title: "Offline",
@@ -76,13 +81,11 @@ export default function TodayPage() {
   const greeting = getGreeting();
   const dateString = formatDate();
 
-  // Get tasks that are marked for today (incomplete only)
   const todayTasks = useMemo(
     () => tasks.filter((t) => todayTaskIds.includes(t.id) && !t.completed),
     [tasks, todayTaskIds]
   );
 
-  // Check if habits are completed today
   const habitsWithStatus = useMemo(
     () =>
       habits.slice(0, 3).map((h) => ({
@@ -92,30 +95,22 @@ export default function TodayPage() {
     [habits, today]
   );
 
-  // Today's mood
   const todayMood = useMemo(
     () => moodEntries.find((m) => m.date === today),
     [moodEntries, today]
   );
 
-  // Check if focus is for today
   const currentFocus = dailyFocus?.date === today ? dailyFocus.text : "";
   const hasFocus = currentFocus.trim().length > 0;
 
   const handleStartEditing = () => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
+    if (!isOnline) { showOfflineToast(); return; }
     setFocusInput(currentFocus);
     setIsEditingFocus(true);
   };
 
   const handleSaveFocus = () => {
-    if (!isOnline) {
-      setIsEditingFocus(false);
-      return;
-    }
+    if (!isOnline) { setIsEditingFocus(false); return; }
     if (focusInput.trim()) {
       setDailyFocus({ text: focusInput.trim(), date: today });
     }
@@ -123,38 +118,24 @@ export default function TodayPage() {
   };
 
   const handleFocusKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSaveFocus();
-    }
+    if (e.key === "Enter") handleSaveFocus();
   };
 
   const handleTaskToggle = (taskId: string) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
+    if (!isOnline) { showOfflineToast(); return; }
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, completed: !t.completed } : t))
     );
   };
 
   const handleRemoveFromToday = (taskId: string) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
+    if (!isOnline) { showOfflineToast(); return; }
     removeFromToday(taskId);
-    toast({
-      title: "Removed from Today",
-      description: "Task moved back to your backlog.",
-    });
+    toast({ title: "Removed from Today", description: "Task moved back to your backlog." });
   };
 
   const handleHabitToggle = (habitId: string) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
+    if (!isOnline) { showOfflineToast(); return; }
     setHabits((prev) =>
       prev.map((h) => {
         if (h.id !== habitId) return h;
@@ -170,10 +151,7 @@ export default function TodayPage() {
   };
 
   const handleMoodSelect = (level: MoodLevel) => {
-    if (!isOnline) {
-      showOfflineToast();
-      return;
-    }
+    if (!isOnline) { showOfflineToast(); return; }
     setMoodEntries((prev) => {
       const filtered = prev.filter((m) => m.date !== today);
       return [
@@ -193,13 +171,43 @@ export default function TodayPage() {
   return (
     <>
       {!isOnline && <OfflineBanner />}
+
+      {/* Coachmarks */}
+      <Coachmark
+        visible={activeHint === "onboarding_today_focus"}
+        title="Daily Focus"
+        description="A gentle direction for your day based on your tasks and habits."
+        onDismiss={() => dismiss("onboarding_today_focus")}
+        onSkipAll={skipAll}
+        anchorRef={focusRef}
+        placement="bottom"
+      />
+      <Coachmark
+        visible={activeHint === "onboarding_today_tasks"}
+        title="Today Tasks"
+        description="These are the tasks you chose to focus on today."
+        onDismiss={() => dismiss("onboarding_today_tasks")}
+        onSkipAll={skipAll}
+        anchorRef={tasksRef}
+        placement="bottom"
+      />
+      <Coachmark
+        visible={activeHint === "onboarding_today_mood"}
+        title="Mood"
+        description="Track how you feel to understand your energy patterns."
+        onDismiss={() => dismiss("onboarding_today_mood")}
+        onSkipAll={skipAll}
+        anchorRef={moodRef}
+        placement="top"
+      />
+
       <motion.div
         className="px-1 py-6 space-y-6"
         variants={container}
         initial="hidden"
         animate="show"
       >
-        {/* Header with System Framing */}
+        {/* Header */}
         <motion.header variants={item} className="space-y-1">
           <p className="text-[10px] font-medium text-primary/70 uppercase tracking-widest">
             Daily Control Layer
@@ -210,13 +218,13 @@ export default function TodayPage() {
 
         {/* Daily Focus */}
         <motion.section
+          ref={focusRef}
           variants={item}
           className="bg-card rounded-xl p-5 shadow-card border border-border/50"
         >
           <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">
             Daily Focus
           </label>
-
           {!hasFocus && !isEditingFocus ? (
             <button
               onClick={handleStartEditing}
@@ -250,18 +258,8 @@ export default function TodayPage() {
           )}
         </motion.section>
 
-        {activeHint === "onboarding_today_focus" && (
-          <HintCard
-            visible
-            title="Daily Focus"
-            description="A gentle direction for your day based on your tasks and habits."
-            onDismiss={() => dismiss("onboarding_today_focus")}
-            onSkipAll={skipAll}
-          />
-        )}
-
         {/* Today's Tasks */}
-        <motion.section variants={item} className="space-y-3">
+        <motion.section ref={tasksRef} variants={item} className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <h2 className="text-sm font-medium text-foreground">Today's Tasks</h2>
@@ -314,16 +312,6 @@ export default function TodayPage() {
           )}
         </motion.section>
 
-        {activeHint === "onboarding_today_tasks" && (
-          <HintCard
-            visible
-            title="Today Tasks"
-            description="These are the tasks you chose to focus on today."
-            onDismiss={() => dismiss("onboarding_today_tasks")}
-            onSkipAll={skipAll}
-          />
-        )}
-
         {/* Habits for Today */}
         <motion.section variants={item} className="space-y-3">
           <div className="flex items-center justify-between">
@@ -370,16 +358,7 @@ export default function TodayPage() {
         </motion.section>
 
         {/* Mood Check-in */}
-        {activeHint === "onboarding_today_mood" && (
-          <HintCard
-            visible
-            title="Mood"
-            description="Track how you feel to understand your energy patterns."
-            onDismiss={() => dismiss("onboarding_today_mood")}
-            onSkipAll={skipAll}
-          />
-        )}
-        <motion.section variants={item} className="space-y-3">
+        <motion.section ref={moodRef} variants={item} className="space-y-3">
           <div className="space-y-1">
             <h2 className="text-sm font-medium text-foreground">
               How are you feeling?

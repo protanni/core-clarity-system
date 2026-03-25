@@ -1,13 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
-import { Plus, ArrowUpRight } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useTodayTasks } from "@/hooks/useTodayTasks";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { Task, LifeArea } from "@/types";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { AreaTabs } from "@/components/shared/AreaTabs";
-import { HintCard } from "@/components/shared/HintCard";
+import { Coachmark } from "@/components/shared/Coachmark";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
@@ -34,10 +34,11 @@ export default function TasksPage() {
     "onboarding_tasks_smart",
   ]);
 
+  const taskListRef = useRef<HTMLDivElement>(null);
+
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskText.trim()) return;
-
     const newTask: Task = {
       id: crypto.randomUUID(),
       text: newTaskText.trim(),
@@ -45,7 +46,6 @@ export default function TasksPage() {
       area: selectedArea === "all" ? undefined : selectedArea,
       createdAt: new Date().toISOString(),
     };
-
     setTasks((prev) => [...prev, newTask]);
     setNewTaskText("");
   };
@@ -62,13 +62,9 @@ export default function TasksPage() {
 
   const handleBringToToday = (taskId: string) => {
     addToToday(taskId);
-    toast({
-      title: "Added to Today",
-      description: "This task will appear in your Today view.",
-    });
+    toast({ title: "Added to Today", description: "This task will appear in your Today view." });
   };
 
-  // Filter tasks by selected area
   const filteredTasks = useMemo(() => {
     if (selectedArea === "all") return tasks;
     return tasks.filter((t) => t.area === selectedArea);
@@ -76,13 +72,31 @@ export default function TasksPage() {
 
   const incompleteTasks = filteredTasks.filter((t) => !t.completed);
   const completedTasks = filteredTasks.filter((t) => t.completed);
-
-  // Total counts for header
   const totalIncomplete = tasks.filter((t) => !t.completed).length;
   const totalCompleted = tasks.filter((t) => t.completed).length;
 
   return (
     <div className="px-1 py-6 space-y-6">
+      {/* Coachmarks */}
+      <Coachmark
+        visible={activeHint === "onboarding_tasks_breakdown"}
+        title="Break tasks down"
+        description="Use subtasks to turn complexity into clear action."
+        onDismiss={() => dismiss("onboarding_tasks_breakdown")}
+        onSkipAll={skipAll}
+        anchorRef={taskListRef}
+        placement="top"
+      />
+      <Coachmark
+        visible={activeHint === "onboarding_tasks_smart"}
+        title="Smart subtasks"
+        description="Use the sparkle icon to generate steps automatically."
+        onDismiss={() => dismiss("onboarding_tasks_smart")}
+        onSkipAll={skipAll}
+        anchorRef={taskListRef}
+        placement="top"
+      />
+
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -10 }}
@@ -97,25 +111,6 @@ export default function TasksPage() {
           {totalIncomplete} open · {totalCompleted} completed
         </p>
       </motion.header>
-
-      {activeHint === "onboarding_tasks_breakdown" && (
-        <HintCard
-          visible
-          title="Break tasks down"
-          description="Use subtasks to turn complexity into clear action."
-          onDismiss={() => dismiss("onboarding_tasks_breakdown")}
-          onSkipAll={skipAll}
-        />
-      )}
-      {activeHint === "onboarding_tasks_smart" && (
-        <HintCard
-          visible
-          title="Smart subtasks"
-          description="Use the sparkle icon to generate steps automatically."
-          onDismiss={() => dismiss("onboarding_tasks_smart")}
-          onSkipAll={skipAll}
-        />
-      )}
 
       {/* Area Tabs */}
       <motion.div
@@ -151,12 +146,12 @@ export default function TasksPage() {
 
       {/* Task List */}
       <motion.div
+        ref={taskListRef}
         variants={container}
         initial="hidden"
         animate="show"
         className="space-y-4"
       >
-        {/* Open Tasks */}
         {incompleteTasks.length > 0 && (
           <motion.div
             variants={item}
@@ -179,7 +174,6 @@ export default function TasksPage() {
           </motion.div>
         )}
 
-        {/* Completed Tasks */}
         {completedTasks.length > 0 && (
           <motion.div variants={item} className="space-y-2">
             <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
@@ -200,12 +194,8 @@ export default function TasksPage() {
           </motion.div>
         )}
 
-        {/* Empty State */}
         {filteredTasks.length === 0 && (
-          <motion.div
-            variants={item}
-            className="text-center py-12"
-          >
+          <motion.div variants={item} className="text-center py-12">
             <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
               <Plus className="w-5 h-5 text-muted-foreground" />
             </div>

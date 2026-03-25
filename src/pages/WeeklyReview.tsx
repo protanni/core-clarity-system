@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Archive, Check } from "lucide-react";
@@ -8,7 +8,7 @@ import { WeeklyReflection } from "@/types";
 import { useWeeklyStats } from "@/hooks/useWeeklyStats";
 import { getWeekDates, getWeekStartISO } from "@/lib/weekUtils";
 import { Button } from "@/components/ui/button";
-import { HintCard } from "@/components/shared/HintCard";
+import { Coachmark } from "@/components/shared/Coachmark";
 import { ConsistencyCard } from "@/components/weekly/ConsistencyCard";
 import { LifeAreasCard } from "@/components/weekly/LifeAreasCard";
 import { EmotionalSummaryCard } from "@/components/weekly/EmotionalSummaryCard";
@@ -40,11 +40,13 @@ export default function WeeklyReviewPage() {
     "onboarding_review_areas",
   ]);
 
+  const headerRef = useRef<HTMLDivElement>(null);
+  const areasRef = useRef<HTMLDivElement>(null);
+
   const weekDates = useMemo(() => getWeekDates(), []);
   const weekStart = getWeekStartISO();
   const stats = useWeeklyStats(weekDates);
 
-  // Current week's reflection
   const currentReflection = useMemo(
     () => reflections.find((r) => r.weekStartDate === weekStart),
     [reflections, weekStart]
@@ -59,7 +61,6 @@ export default function WeeklyReviewPage() {
     value: string
   ) => {
     if (isSaved) setIsSaved(false);
-
     setReflections((prev) => {
       const existingIndex = prev.findIndex((r) => r.weekStartDate === weekStart);
       if (existingIndex >= 0) {
@@ -96,8 +97,28 @@ export default function WeeklyReviewPage() {
       initial="hidden"
       animate="show"
     >
+      {/* Coachmarks */}
+      <Coachmark
+        visible={activeHint === "onboarding_review_weekly"}
+        title="Weekly review"
+        description="Reflect on your progress and emotional patterns."
+        onDismiss={() => dismiss("onboarding_review_weekly")}
+        onSkipAll={skipAll}
+        anchorRef={headerRef}
+        placement="bottom"
+      />
+      <Coachmark
+        visible={activeHint === "onboarding_review_areas"}
+        title="Life overview"
+        description="See which areas of your life received attention."
+        onDismiss={() => dismiss("onboarding_review_areas")}
+        onSkipAll={skipAll}
+        anchorRef={areasRef}
+        placement="top"
+      />
+
       {/* Header */}
-      <motion.header variants={item} className="space-y-2">
+      <motion.header ref={headerRef} variants={item} className="space-y-2">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-foreground">Weekly Review</h1>
           <Link
@@ -113,25 +134,6 @@ export default function WeeklyReviewPage() {
         </p>
       </motion.header>
 
-      {activeHint === "onboarding_review_weekly" && (
-        <HintCard
-          visible
-          title="Weekly review"
-          description="Reflect on your progress and emotional patterns."
-          onDismiss={() => dismiss("onboarding_review_weekly")}
-          onSkipAll={skipAll}
-        />
-      )}
-      {activeHint === "onboarding_review_areas" && (
-        <HintCard
-          visible
-          title="Life overview"
-          description="See which areas of your life received attention."
-          onDismiss={() => dismiss("onboarding_review_areas")}
-          onSkipAll={skipAll}
-        />
-      )}
-
       {/* Cards */}
       <motion.div variants={item}>
         <ConsistencyCard
@@ -140,7 +142,7 @@ export default function WeeklyReviewPage() {
         />
       </motion.div>
 
-      <motion.div variants={item}>
+      <motion.div ref={areasRef} variants={item}>
         <LifeAreasCard areasTouched={stats.areasTouched} />
       </motion.div>
 
@@ -159,7 +161,7 @@ export default function WeeklyReviewPage() {
         />
       </motion.div>
 
-      {/* Save Button / Confirmation */}
+      {/* Save Button */}
       <motion.div variants={item} className="pt-2 pb-4">
         <AnimatePresence mode="wait">
           {isSaved && !isEditing ? (

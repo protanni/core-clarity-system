@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -6,7 +6,7 @@ import { useOnboarding } from "@/hooks/useOnboarding";
 import { Habit, LifeArea } from "@/types";
 import { HabitItem } from "@/components/habits/HabitItem";
 import { AreaTabs } from "@/components/shared/AreaTabs";
-import { HintCard } from "@/components/shared/HintCard";
+import { Coachmark } from "@/components/shared/Coachmark";
 import { Input } from "@/components/ui/input";
 
 const container = {
@@ -35,9 +35,9 @@ export default function HabitsPage() {
     "onboarding_habits_progress",
   ]);
 
+  const habitListRef = useRef<HTMLDivElement>(null);
   const today = getTodayISO();
 
-  // Filter habits by selected area
   const filteredHabits = useMemo(() => {
     if (selectedArea === "all") return habits;
     return habits.filter((h) => h.area === selectedArea);
@@ -55,7 +55,6 @@ export default function HabitsPage() {
   const handleAddHabit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newHabitName.trim()) return;
-
     const newHabit: Habit = {
       id: crypto.randomUUID(),
       name: newHabitName.trim(),
@@ -63,7 +62,6 @@ export default function HabitsPage() {
       area: selectedArea === "all" ? undefined : selectedArea,
       createdAt: new Date().toISOString(),
     };
-
     setHabits((prev) => [...prev, newHabit]);
     setNewHabitName("");
   };
@@ -87,11 +85,30 @@ export default function HabitsPage() {
     setHabits((prev) => prev.filter((h) => h.id !== habitId));
   };
 
-  const completedCount = habitsWithStatus.filter((h) => h.completedToday).length;
   const totalCompletedToday = habits.filter((h) => h.completedDates.includes(today)).length;
 
   return (
     <div className="px-1 py-6 space-y-6">
+      {/* Coachmarks */}
+      <Coachmark
+        visible={activeHint === "onboarding_habits_consistency"}
+        title="Consistency matters"
+        description="Build habits through small daily actions."
+        onDismiss={() => dismiss("onboarding_habits_consistency")}
+        onSkipAll={skipAll}
+        anchorRef={habitListRef}
+        placement="top"
+      />
+      <Coachmark
+        visible={activeHint === "onboarding_habits_progress"}
+        title="Progress tracking"
+        description="Your weekly dots show how consistent you are."
+        onDismiss={() => dismiss("onboarding_habits_progress")}
+        onSkipAll={skipAll}
+        anchorRef={habitListRef}
+        placement="top"
+      />
+
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -10 }}
@@ -103,25 +120,6 @@ export default function HabitsPage() {
           {totalCompletedToday} of {habits.length} completed today
         </p>
       </motion.header>
-
-      {activeHint === "onboarding_habits_consistency" && (
-        <HintCard
-          visible
-          title="Consistency matters"
-          description="Build habits through small daily actions."
-          onDismiss={() => dismiss("onboarding_habits_consistency")}
-          onSkipAll={skipAll}
-        />
-      )}
-      {activeHint === "onboarding_habits_progress" && (
-        <HintCard
-          visible
-          title="Progress tracking"
-          description="Your weekly dots show how consistent you are."
-          onDismiss={() => dismiss("onboarding_habits_progress")}
-          onSkipAll={skipAll}
-        />
-      )}
 
       {/* Area Tabs */}
       <motion.div
@@ -157,6 +155,7 @@ export default function HabitsPage() {
 
       {/* Habit List */}
       <motion.div
+        ref={habitListRef}
         variants={container}
         initial="hidden"
         animate="show"
