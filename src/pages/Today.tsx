@@ -5,11 +5,13 @@ import { Link } from "react-router-dom";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { useTodayTasks } from "@/hooks/useTodayTasks";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { Task, Habit, MoodEntry, DailyFocus, MoodLevel } from "@/types";
 import { MoodCard } from "@/components/mood/MoodCard";
 import { TaskItem } from "@/components/tasks/TaskItem";
 import { HabitItem } from "@/components/habits/HabitItem";
 import { OfflineBanner } from "@/components/shared/OfflineBanner";
+import { HintCard } from "@/components/shared/HintCard";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
