@@ -2,9 +2,11 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Plus } from "lucide-react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useOnboarding } from "@/hooks/useOnboarding";
 import { Habit, LifeArea } from "@/types";
 import { HabitItem } from "@/components/habits/HabitItem";
 import { AreaTabs } from "@/components/shared/AreaTabs";
+import { HintCard } from "@/components/shared/HintCard";
 import { Input } from "@/components/ui/input";
 
 const container = {
