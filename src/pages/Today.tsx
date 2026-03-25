@@ -58,6 +58,11 @@ export default function TodayPage() {
   const [focusInput, setFocusInput] = useState("");
 
   const isOnline = useOnlineStatus();
+  const { activeHint, dismiss, skipAll } = useOnboarding([
+    "onboarding_today_focus",
+    "onboarding_today_tasks",
+    "onboarding_today_mood",
+  ]);
 
   const showOfflineToast = () => {
     toast({
