@@ -35,6 +35,10 @@ export default function WeeklyReviewPage() {
 
   const [isSaved, setIsSaved] = useState(false);
   const [isEditing, setIsEditing] = useState(true);
+  const { activeHint, dismiss, skipAll } = useOnboarding([
+    "onboarding_review_weekly",
+    "onboarding_review_areas",
+  ]);
 
   const weekDates = useMemo(() => getWeekDates(), []);
   const weekStart = getWeekStartISO();
