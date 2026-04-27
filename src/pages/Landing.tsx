@@ -280,42 +280,85 @@ function MockHabitsScreen() {
   );
 }
 
-function MockReviewScreen() {
+/* ─── Cropped UI fragments — small moments instead of full screens ─── */
+
+function FragmentDailyFocus() {
   return (
-    <div
-      className="rounded-2xl overflow-hidden shadow-card border border-border/50 bg-card flex flex-col"
-      style={{ width: 220, height: 380 }}
-    >
-      <div className="flex-1 p-4 space-y-3 overflow-hidden">
-        <div>
-          <p className="text-sm font-semibold text-foreground">Weekly Review</p>
-          <p className="text-[8px] text-muted-foreground">Reflect, realign, prepare.</p>
-        </div>
-        <div className="rounded-lg p-2.5 bg-muted/50 border border-border/30 space-y-1">
-          <p className="text-[7px] font-medium text-muted-foreground uppercase tracking-wide">Consistency</p>
-          <p className="text-[8px] text-foreground">
-            Showed up <span className="text-primary font-medium">5</span> of 7 days
-          </p>
-          <p className="text-[8px] text-foreground">
-            Habits: <span className="text-primary font-medium">18</span> completions
-          </p>
-        </div>
-        <div className="rounded-lg p-2.5 bg-muted/50 border border-border/30 space-y-1">
-          <p className="text-[7px] font-medium text-muted-foreground uppercase tracking-wide">
-            Emotional Summary
-          </p>
-          <p className="text-[8px] text-foreground">
-            Mostly: <span className="text-primary font-medium">Good</span>
-          </p>
-        </div>
-        <div className="rounded-lg p-2.5 bg-muted/50 border border-border/30 space-y-1">
-          <p className="text-[7px] font-medium text-muted-foreground uppercase tracking-wide">
-            Reflection
-          </p>
-          <p className="text-[8px] text-muted-foreground italic">"Felt more focused this week…"</p>
-        </div>
+    <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5 max-w-[280px]">
+      <div className="flex items-center gap-1.5 mb-2">
+        <Sparkles className="w-3 h-3 text-primary" strokeWidth={1.75} />
+        <p className="text-[9px] font-medium text-muted-foreground uppercase tracking-widest">
+          Daily Focus
+        </p>
       </div>
-      <MockBottomNav active="Review" />
+      <p className="text-sm font-medium text-foreground leading-snug">
+        Ship landing page v1
+      </p>
+      <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
+        Drawn from your tasks, habits and recent context.
+      </p>
+    </div>
+  );
+}
+
+function FragmentHabitRow() {
+  return (
+    <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5 max-w-[300px] space-y-3">
+      {[
+        { label: "Meditate 10 min", done: true, dots: 6 },
+        { label: "Read", done: true, dots: 5 },
+        { label: "Journal", done: false, dots: 3 },
+      ].map((h) => (
+        <div key={h.label} className="flex items-center gap-3">
+          <div
+            className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+              h.done ? "bg-primary border-primary" : "border-border"
+            }`}
+          >
+            {h.done && <Check className="w-2.5 h-2.5 text-primary-foreground" strokeWidth={3} />}
+          </div>
+          <p className={`text-xs flex-1 ${h.done ? "text-muted-foreground" : "text-foreground"}`}>
+            {h.label}
+          </p>
+          <div className="flex gap-0.5">
+            {Array.from({ length: 7 }).map((_, d) => (
+              <div
+                key={d}
+                className={`w-1 h-1 rounded-full ${d < h.dots ? "bg-primary/60" : "bg-border"}`}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function FragmentMood() {
+  return (
+    <div className="bg-card rounded-2xl border border-border/50 shadow-card p-5 max-w-[280px]">
+      <p className="text-[10px] font-medium text-muted-foreground mb-3">
+        How are you feeling?
+      </p>
+      <div className="flex gap-1.5">
+        {[
+          { label: "Great", color: "hsl(158,40%,85%)" },
+          { label: "Good", color: "hsl(180,35%,85%)", selected: true },
+          { label: "Okay", color: "hsl(45,30%,88%)" },
+          { label: "Low", color: "hsl(25,40%,88%)" },
+          { label: "Bad", color: "hsl(0,35%,88%)" },
+        ].map((m) => (
+          <div
+            key={m.label}
+            className={`flex-1 rounded-lg py-2 flex items-center justify-center ${
+              m.selected ? "ring-2 ring-primary ring-offset-2 ring-offset-card" : ""
+            }`}
+            style={{ backgroundColor: m.color }}
+          >
+            <span className="text-[9px] font-medium opacity-75">{m.label}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -324,23 +367,15 @@ function MockReviewScreen() {
 export default function LandingPage() {
   const navigate = useNavigate();
 
-  /* Hero depth animation — cycles Today → Tasks → Habits */
-  const [activeHeroIdx, setActiveHeroIdx] = useState(0); // 0=Today, 1=Tasks, 2=Habits
-  useEffect(() => {
-    const id = setInterval(() => setActiveHeroIdx((i) => (i + 1) % 3), 3000);
-    return () => clearInterval(id);
-  }, []);
-
   /* Dark island crossfade */
   const [showDark, setShowDark] = useState(false);
   useEffect(() => {
-    const id = setInterval(() => setShowDark((d) => !d), 3500);
+    const id = setInterval(() => setShowDark((d) => !d), 4000);
     return () => clearInterval(id);
   }, []);
 
   /* Scroll refs */
   const heroRef = useRef<HTMLDivElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   /* Hero scroll progress for parallax */
   const { scrollYProgress: heroProgress } = useScroll({
@@ -348,19 +383,7 @@ export default function LandingPage() {
     offset: ["start start", "end start"],
   });
   const heroY1 = useTransform(heroProgress, [0, 1], [0, -20]);
-  const heroY2 = useTransform(heroProgress, [0, 1], [0, -12]);
-
-  /* Product preview — staggered horizontal drift per card */
-  const { scrollYProgress: previewProgress } = useScroll({
-    target: previewRef,
-    offset: ["start end", "end start"],
-  });
-  const px0 = useTransform(previewProgress, [0, 1], [55, -25]); // 80px range
-  const px1 = useTransform(previewProgress, [0, 1], [45, -20]); // 65px range
-  const px2 = useTransform(previewProgress, [0, 1], [36, -14]); // 50px range
-  const px3 = useTransform(previewProgress, [0, 1], [28, -8]);  // 36px range
-
-  const depthTransition = { duration: 0.8, ease: [0.4, 0, 0.2, 1] as const };
+  const heroY2 = useTransform(heroProgress, [0, 1], [0, -10]);
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
@@ -380,16 +403,16 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* ─── HERO ─── */}
+      {/* ─── HERO — focused: 1 main + 2 faded side mockups ─── */}
       <section ref={heroRef} className="relative overflow-hidden">
 
-        {/* Radial background glows — barely perceptible, < 5% opacity */}
+        {/* Radial background glows */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
           <div
-            className="absolute top-[38%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full"
+            className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[700px] rounded-full"
             style={{
-              background: "radial-gradient(ellipse, hsl(158 35% 45% / 0.05) 0%, transparent 65%)",
-              filter: "blur(40px)",
+              background: "radial-gradient(ellipse, hsl(158 35% 45% / 0.06) 0%, transparent 65%)",
+              filter: "blur(50px)",
             }}
           />
           <div
@@ -408,7 +431,7 @@ export default function LandingPage() {
           />
         </div>
 
-        <div className="max-w-5xl mx-auto px-6 pt-24 pb-20 md:pt-40 md:pb-32">
+        <div className="max-w-5xl mx-auto px-6 pt-28 pb-28 md:pt-44 md:pb-40">
 
           {/* Text block */}
           <motion.div
@@ -454,162 +477,78 @@ export default function LandingPage() {
             </motion.div>
           </motion.div>
 
-          {/* Mockup trio — layered depth animation */}
-          <div className="mt-20 flex justify-center">
-            <div className="flex items-end gap-5 md:gap-8">
+          {/* Mockup — center focused, side mockups heavily faded/blurred suggestion */}
+          <div className="mt-24 flex justify-center">
+            <div className="flex items-end gap-0 md:gap-2 relative">
 
-              {/* Left — Tasks (depth index 1) */}
+              {/* Left — Tasks (suggestive only, very faded) */}
               <motion.div
-                className="hidden md:block"
+                className="hidden md:block -mr-12 lg:-mr-16"
                 style={{ y: heroY2 }}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 0.28, x: 0 }}
+                transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1], delay: 0.3 }}
               >
-                <motion.div
-                  initial={{ opacity: 0, y: -12 }}
-                  animate={{
-                    opacity: activeHeroIdx === 1 ? 1 : 0.45,
-                    scale: activeHeroIdx === 1 ? 1 : 0.96,
-                    filter: activeHeroIdx === 1 ? "blur(0px)" : "blur(1px)",
-                    y: activeHeroIdx === 1 ? -24 : -12,
+                <div
+                  style={{
+                    filter: "blur(2px)",
+                    transform: "scale(0.86) translateY(20px)",
+                    transformOrigin: "bottom right",
                   }}
-                  transition={depthTransition}
                 >
                   <MockTasksScreen />
-                </motion.div>
+                </div>
               </motion.div>
 
-              {/* Center — Today (depth index 0) */}
-              <motion.div style={{ y: heroY1 }}>
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{
-                    opacity: activeHeroIdx === 0 ? 1 : 0.45,
-                    scale: activeHeroIdx === 0 ? 1 : 0.96,
-                    filter: activeHeroIdx === 0 ? "blur(0px)" : "blur(1px)",
-                    y: activeHeroIdx === 0 ? 0 : 12,
-                  }}
-                  transition={depthTransition}
-                  className="relative"
-                >
+              {/* Center — Today (full focus) */}
+              <motion.div
+                style={{ y: heroY1 }}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1], delay: 0.15 }}
+                className="relative z-10"
+              >
+                <div className="relative">
                   <MockTodayScreen />
                   {/* Ambient glow behind center screen */}
-                  <motion.div
-                    className="absolute -inset-8 rounded-3xl blur-3xl -z-10"
-                    animate={{
-                      opacity: activeHeroIdx === 0 ? 1 : 0.3,
-                      background: "hsl(158 35% 45% / 0.06)",
-                    }}
-                    transition={depthTransition}
+                  <div
+                    className="absolute -inset-10 rounded-3xl blur-3xl -z-10"
+                    style={{ background: "hsl(158 35% 45% / 0.10)" }}
+                    aria-hidden
                   />
-                </motion.div>
+                </div>
               </motion.div>
 
-              {/* Right — Habits (depth index 2) */}
+              {/* Right — Habits (suggestive only, very faded) */}
               <motion.div
-                className="hidden md:block"
+                className="hidden md:block -ml-12 lg:-ml-16"
                 style={{ y: heroY2 }}
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 0.28, x: 0 }}
+                transition={{ duration: 1.2, ease: [0.25, 0.1, 0.25, 1], delay: 0.3 }}
               >
-                <motion.div
-                  initial={{ opacity: 0, y: -12 }}
-                  animate={{
-                    opacity: activeHeroIdx === 2 ? 1 : 0.45,
-                    scale: activeHeroIdx === 2 ? 1 : 0.96,
-                    filter: activeHeroIdx === 2 ? "blur(0px)" : "blur(1px)",
-                    y: activeHeroIdx === 2 ? -24 : -12,
+                <div
+                  style={{
+                    filter: "blur(2px)",
+                    transform: "scale(0.86) translateY(20px)",
+                    transformOrigin: "bottom left",
                   }}
-                  transition={depthTransition}
                 >
                   <MockHabitsScreen />
-                </motion.div>
+                </div>
               </motion.div>
 
             </div>
           </div>
 
-          {/* Depth indicator dots */}
-          <motion.div
-            className="flex items-center justify-center gap-1.5 mt-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.5 }}
-          >
-            {[0, 1, 2].map((i) => (
-              <motion.div
-                key={i}
-                className="rounded-full bg-primary"
-                animate={{
-                  width: activeHeroIdx === i ? 16 : 6,
-                  opacity: activeHeroIdx === i ? 0.8 : 0.25,
-                }}
-                transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                style={{ height: 6 }}
-              />
-            ))}
-          </motion.div>
-
         </div>
       </section>
 
-      {/* ─── PRODUCT PREVIEW ─── */}
-      <section className="py-24 md:py-32 bg-muted/30" ref={previewRef}>
-        <div className="max-w-5xl mx-auto px-6">
-          <motion.div
-            className="text-center mb-16 space-y-3"
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-          >
-            <motion.p
-              variants={fadeUp}
-              className="text-[10px] font-medium text-primary uppercase tracking-[0.2em]"
-            >
-              Product Preview
-            </motion.p>
-            <motion.h2
-              variants={fadeUp}
-              className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight"
-            >
-              Everything you need, nothing you don't
-            </motion.h2>
-            <motion.p variants={fadeUp} className="text-sm text-muted-foreground max-w-md mx-auto">
-              Tasks, habits, reflection and review — connected in one simple system.
-            </motion.p>
-          </motion.div>
-
-          {/* Staggered horizontal drift — each card has a slightly different speed */}
-          <div className="overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 justify-items-center">
-              {[
-                { label: "Today", comp: <MockTodayScreen />, x: px0, delay: 0 },
-                { label: "Tasks", comp: <MockTasksScreen />, x: px1, delay: 0.07 },
-                { label: "Habits", comp: <MockHabitsScreen />, x: px2, delay: 0.14 },
-                { label: "Review", comp: <MockReviewScreen />, x: px3, delay: 0.21 },
-              ].map((screen) => (
-                <motion.div
-                  key={screen.label}
-                  style={{ x: screen.x }}
-                  className="space-y-3 flex flex-col items-center"
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: screen.delay, ease: [0.25, 0.1, 0.25, 1] }}
-                >
-                  <div className="transform scale-[0.82] md:scale-100 origin-top">
-                    {screen.comp}
-                  </div>
-                  <p className="text-xs font-medium text-muted-foreground">{screen.label}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── HOW IT WORKS ─── */}
-      <section id="how-it-works" className="py-24 md:py-32">
+      {/* ─── HOW IT WORKS — text-driven, no UI ─── */}
+      <section id="how-it-works" className="py-28 md:py-40">
         <div className="max-w-3xl mx-auto px-6">
           <motion.div
-            className="text-center mb-16 space-y-3"
+            className="text-center mb-20 space-y-3"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -630,7 +569,7 @@ export default function LandingPage() {
           </motion.div>
 
           <motion.div
-            className="grid md:grid-cols-3 gap-10 md:gap-12"
+            className="grid md:grid-cols-3 gap-12 md:gap-14"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -682,102 +621,167 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── AI ASSISTANCE ─── */}
-      <section className="py-24 md:py-32 bg-muted/30">
-        <div className="max-w-3xl mx-auto px-6">
-          <motion.div
-            className="text-center mb-14 space-y-4"
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-          >
-            <motion.div variants={fadeUp} className="flex items-center justify-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5 text-primary" strokeWidth={1.75} />
-              </div>
-              <p className="text-[10px] font-medium text-primary uppercase tracking-[0.2em]">
-                AI Assistance
-              </p>
+      {/* ─── DAILY FOCUS / AI — text left, fragment right ─── */}
+      <section className="py-28 md:py-40 bg-muted/30">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-16 md:gap-20 items-center">
+
+            {/* Text */}
+            <motion.div
+              className="space-y-6"
+              variants={stagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+            >
+              <motion.div variants={fadeUp} className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" strokeWidth={1.75} />
+                </div>
+                <p className="text-[10px] font-medium text-primary uppercase tracking-[0.2em]">
+                  AI Assistance
+                </p>
+              </motion.div>
+              <motion.h2
+                variants={fadeUp}
+                className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight leading-tight"
+              >
+                Thoughtful assistance,
+                <br />
+                when you need it
+              </motion.h2>
+              <motion.p
+                variants={fadeUp}
+                className="text-sm text-muted-foreground leading-relaxed"
+              >
+                Protanni uses your own data — tasks, habits, mood and history — to help you decide what
+                matters most today. One personalized focus, so you always know where to start.
+              </motion.p>
             </motion.div>
-            <motion.h2
-              variants={fadeUp}
-              className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight"
-            >
-              Thoughtful assistance,
-              <br className="hidden md:block" /> when you need it
-            </motion.h2>
-            <motion.p
-              variants={fadeUp}
-              className="text-sm text-muted-foreground leading-relaxed max-w-lg mx-auto"
-            >
-              Protanni can use your own data — tasks, habits, mood and history — to help you decide what
-              matters most today. Generate a personalized Daily Focus based on your current context so you
-              always know where to start.
-            </motion.p>
-          </motion.div>
 
-          {/* Cards with ambient glow behind + premium hover */}
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true }}
-            className="relative"
-          >
-            {/* Subtle sage glow behind AI cards */}
-            <div
-              className="absolute inset-0 -m-10 rounded-3xl pointer-events-none"
-              style={{
-                background: "radial-gradient(ellipse at center, hsl(158 35% 45% / 0.07) 0%, transparent 68%)",
-                filter: "blur(24px)",
-              }}
-              aria-hidden
-            />
+            {/* Single fragment */}
+            <motion.div
+              className="flex justify-center md:justify-end relative"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <div
+                className="absolute -inset-8 rounded-3xl blur-3xl -z-10"
+                style={{ background: "radial-gradient(ellipse at center, hsl(158 35% 45% / 0.10) 0%, transparent 70%)" }}
+                aria-hidden
+              />
+              <FragmentDailyFocus />
+            </motion.div>
 
-            <div className="grid sm:grid-cols-2 gap-5 relative z-10">
-              {[
-                {
-                  icon: Sparkles,
-                  title: "Daily Focus",
-                  desc: "Create a personalized daily focus using your tasks, habits and recent activity.",
-                },
-                {
-                  icon: Wand2,
-                  title: "Smart task breakdown",
-                  desc: "Turn overwhelming tasks into clear next steps. Protanni can break complex tasks into smaller, actionable subtasks so you can start moving forward immediately.",
-                },
-              ].map((f) => {
-                const Icon = f.icon;
-                return (
-                  <motion.div
-                    key={f.title}
-                    variants={fadeUp}
-                    whileHover={{
-                      y: -4,
-                      boxShadow: "0 16px 40px -8px hsl(158 35% 45% / 0.12)",
-                      transition: { duration: 0.18 },
-                    }}
-                    className="bg-card rounded-xl p-6 border border-border/50 shadow-card space-y-3 cursor-default"
-                  >
-                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Icon className="w-4 h-4 text-primary" strokeWidth={1.75} />
-                    </div>
-                    <h3 className="text-sm font-semibold text-foreground">{f.title}</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{f.desc}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ─── CORE FEATURES ─── */}
-      <section className="py-24 md:py-32">
+      {/* ─── HABITS MOMENT — fragment left, text right ─── */}
+      <section className="py-28 md:py-40">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-16 md:gap-20 items-center">
+
+            {/* Fragment */}
+            <motion.div
+              className="flex justify-center md:justify-start order-2 md:order-1"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <FragmentHabitRow />
+            </motion.div>
+
+            {/* Text */}
+            <motion.div
+              className="space-y-6 order-1 md:order-2"
+              variants={stagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+            >
+              <motion.p
+                variants={fadeUp}
+                className="text-[10px] font-medium text-primary uppercase tracking-[0.2em]"
+              >
+                Habits
+              </motion.p>
+              <motion.h2
+                variants={fadeUp}
+                className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight leading-tight"
+              >
+                Consistency,
+                <br />
+                quietly tracked
+              </motion.h2>
+              <motion.p
+                variants={fadeUp}
+                className="text-sm text-muted-foreground leading-relaxed"
+              >
+                A simple check, a small dot. No streaks to defend, no pressure to perform — just a calm
+                view of how you're showing up.
+              </motion.p>
+            </motion.div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ─── MOOD MOMENT — text left, fragment right ─── */}
+      <section className="py-28 md:py-40 bg-muted/30">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 gap-16 md:gap-20 items-center">
+
+            <motion.div
+              className="space-y-6"
+              variants={stagger}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+            >
+              <motion.p
+                variants={fadeUp}
+                className="text-[10px] font-medium text-primary uppercase tracking-[0.2em]"
+              >
+                Mood
+              </motion.p>
+              <motion.h2
+                variants={fadeUp}
+                className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight leading-tight"
+              >
+                A gentle daily signal
+              </motion.h2>
+              <motion.p
+                variants={fadeUp}
+                className="text-sm text-muted-foreground leading-relaxed"
+              >
+                One tap. No journaling required. Over time, your emotional rhythm becomes part of the
+                bigger picture — visible in your weekly review.
+              </motion.p>
+            </motion.div>
+
+            <motion.div
+              className="flex justify-center md:justify-end"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+              <FragmentMood />
+            </motion.div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CORE FEATURES — text-only grid, no UI ─── */}
+      <section className="py-28 md:py-40">
         <div className="max-w-4xl mx-auto px-6">
           <motion.div
-            className="text-center mb-16 space-y-3"
+            className="text-center mb-20 space-y-3"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -861,17 +865,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── DARK ISLAND — Designed for Day and Night ─── */}
+      {/* ─── DARK ISLAND — atmospheric, single phone with vignette ─── */}
       <section
-        className="py-24 md:py-32 relative overflow-hidden"
+        className="py-28 md:py-40 relative overflow-hidden"
         style={{ backgroundColor: "hsl(220 18% 10%)" }}
       >
-        {/* Ambient glow inside dark island */}
+        {/* Ambient glow */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden>
           <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] rounded-full"
             style={{
-              background: "radial-gradient(ellipse, hsl(158 30% 35% / 0.08) 0%, transparent 65%)",
+              background: "radial-gradient(ellipse, hsl(158 30% 35% / 0.10) 0%, transparent 65%)",
               filter: "blur(60px)",
             }}
           />
@@ -888,7 +892,7 @@ export default function LandingPage() {
 
           {/* Header */}
           <motion.div
-            className="text-center space-y-5 mb-14"
+            className="text-center space-y-5 mb-16"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -905,7 +909,6 @@ export default function LandingPage() {
                 }}
                 aria-label="Toggle theme preview"
               >
-                {/* Sliding pill indicator */}
                 <motion.div
                   className="absolute rounded-full"
                   style={{
@@ -919,7 +922,6 @@ export default function LandingPage() {
                   animate={{ x: showDark ? 34 : 0 }}
                   transition={{ type: "spring", stiffness: 400, damping: 28 }}
                 />
-                {/* Sun */}
                 <div
                   className="relative z-10 flex items-center justify-center"
                   style={{ width: 38, height: 38 }}
@@ -929,7 +931,6 @@ export default function LandingPage() {
                     style={{ color: showDark ? "hsl(220 8% 38%)" : "hsl(38 70% 62%)" }}
                   />
                 </div>
-                {/* Moon */}
                 <div
                   className="relative z-10 flex items-center justify-center"
                   style={{ width: 38, height: 38 }}
@@ -954,149 +955,88 @@ export default function LandingPage() {
               className="text-sm leading-relaxed max-w-md mx-auto"
               style={{ color: "hsl(220 8% 58%)" }}
             >
-              Choose the interface that feels best for you. Protanni supports both light and dark mode
-              while keeping the same calm, clear experience.
+              The same calm, clear experience — whether the lights are on or the world is asleep.
             </motion.p>
           </motion.div>
 
-          {/* Phone previews — primary crossfades, secondary mirrors */}
+          {/* Single phone, partially visible — fades into the dark with a vignette mask */}
           <motion.div
-            className="flex justify-center items-end gap-8 md:gap-16"
+            className="flex justify-center"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7 }}
           >
-            {/* Primary phone — crossfades between light and dark */}
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative" style={{ width: 220, height: 380 }}>
-                {/* Light variant */}
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{ opacity: showDark ? 0 : 1 }}
-                  transition={{ duration: 0.75, ease: "easeInOut" }}
-                >
-                  <MockTodayScreen />
-                </motion.div>
-                {/* Dark variant */}
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{ opacity: showDark ? 1 : 0 }}
-                  transition={{ duration: 0.75, ease: "easeInOut" }}
-                >
-                  <MockTodayScreen dark />
-                </motion.div>
-              </div>
-
-              {/* Label crossfade */}
-              <div style={{ height: 20, position: "relative" }}>
-                <AnimatePresence mode="wait">
-                  {showDark ? (
-                    <motion.div
-                      key="dark-label"
-                      className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2"
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      transition={{ duration: 0.28 }}
-                    >
-                      <Moon size={11} style={{ color: "hsl(220 8% 52%)" }} />
-                      <p className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(220 8% 52%)" }}>
-                        Dark mode
-                      </p>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="light-label"
-                      className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2"
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      transition={{ duration: 0.28 }}
-                    >
-                      <Sun size={11} style={{ color: "hsl(220 8% 52%)" }} />
-                      <p className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(220 8% 52%)" }}>
-                        Light mode
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Secondary phone — shows the opposite state, smaller and dimmed */}
-            <div className="flex flex-col items-center gap-4">
-              <div
-                style={{
-                  width: 220,
-                  height: 380,
-                  transform: "scale(0.78)",
-                  transformOrigin: "bottom center",
-                  opacity: 0.45,
-                }}
-                className="relative"
+            <div
+              className="relative"
+              style={{
+                width: 220,
+                height: 380,
+                WebkitMaskImage:
+                  "radial-gradient(ellipse 70% 80% at 50% 35%, black 45%, transparent 90%)",
+                maskImage:
+                  "radial-gradient(ellipse 70% 80% at 50% 35%, black 45%, transparent 90%)",
+              }}
+            >
+              <motion.div
+                className="absolute inset-0"
+                animate={{ opacity: showDark ? 0 : 1 }}
+                transition={{ duration: 0.9, ease: "easeInOut" }}
               >
-                {/* Opposite: light when primary is dark, dark when primary is light */}
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{ opacity: showDark ? 1 : 0 }}
-                  transition={{ duration: 0.75, ease: "easeInOut" }}
-                >
-                  <MockTodayScreen />
-                </motion.div>
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{ opacity: showDark ? 0 : 1 }}
-                  transition={{ duration: 0.75, ease: "easeInOut" }}
-                >
-                  <MockTodayScreen dark />
-                </motion.div>
-              </div>
-
-              {/* Opposite label */}
-              <div style={{ height: 20, position: "relative", opacity: 0.45 }}>
-                <AnimatePresence mode="wait">
-                  {showDark ? (
-                    <motion.div
-                      key="light-label-2"
-                      className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2"
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      transition={{ duration: 0.28 }}
-                    >
-                      <Sun size={11} style={{ color: "hsl(220 8% 52%)" }} />
-                      <p className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(220 8% 52%)" }}>
-                        Light mode
-                      </p>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="dark-label-2"
-                      className="flex items-center gap-1.5 absolute left-1/2 -translate-x-1/2"
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      transition={{ duration: 0.28 }}
-                    >
-                      <Moon size={11} style={{ color: "hsl(220 8% 52%)" }} />
-                      <p className="text-[10px] font-medium whitespace-nowrap" style={{ color: "hsl(220 8% 52%)" }}>
-                        Dark mode
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                <MockTodayScreen />
+              </motion.div>
+              <motion.div
+                className="absolute inset-0"
+                animate={{ opacity: showDark ? 1 : 0 }}
+                transition={{ duration: 0.9, ease: "easeInOut" }}
+              >
+                <MockTodayScreen dark />
+              </motion.div>
             </div>
           </motion.div>
+
+          {/* Mode label */}
+          <div className="flex justify-center mt-6" style={{ height: 20, position: "relative" }}>
+            <AnimatePresence mode="wait">
+              {showDark ? (
+                <motion.div
+                  key="dark-label"
+                  className="flex items-center gap-1.5 absolute"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.28 }}
+                >
+                  <Moon size={11} style={{ color: "hsl(220 8% 52%)" }} />
+                  <p className="text-[10px] font-medium" style={{ color: "hsl(220 8% 52%)" }}>
+                    Dark mode
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="light-label"
+                  className="flex items-center gap-1.5 absolute"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.28 }}
+                >
+                  <Sun size={11} style={{ color: "hsl(220 8% 52%)" }} />
+                  <p className="text-[10px] font-medium" style={{ color: "hsl(220 8% 52%)" }}>
+                    Light mode
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </section>
 
-      {/* ─── PHILOSOPHY ─── */}
-      <section className="py-24 md:py-32">
+      {/* ─── PHILOSOPHY — pure text, generous spacing ─── */}
+      <section className="py-32 md:py-44">
         <div className="max-w-xl mx-auto px-6">
           <motion.div
-            className="text-center space-y-8"
+            className="text-center space-y-10"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -1111,7 +1051,7 @@ export default function LandingPage() {
               </h2>
             </motion.div>
 
-            <motion.div variants={fadeUp} className="space-y-5">
+            <motion.div variants={fadeUp} className="space-y-6">
               <p className="text-sm text-muted-foreground leading-[1.9]">
                 Protanni isn't about squeezing more out of every day. It's about seeing your life clearly
                 — what you're doing, how you're feeling, and where your attention goes.
@@ -1132,10 +1072,10 @@ export default function LandingPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="py-24 md:py-32 bg-muted/30">
+      <section className="py-28 md:py-40 bg-muted/30">
         <div className="max-w-3xl mx-auto px-6">
           <motion.div
-            className="text-center mb-14 space-y-3"
+            className="text-center mb-16 space-y-3"
             variants={stagger}
             initial="hidden"
             whileInView="show"
@@ -1241,8 +1181,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ─── FINAL CTA ─── */}
-      <section className="py-24 md:py-32">
+      {/* ─── FINAL CTA — clean centered, no UI ─── */}
+      <section className="py-32 md:py-44">
         <div className="max-w-xl mx-auto px-6 text-center">
           <motion.div
             className="space-y-7"
